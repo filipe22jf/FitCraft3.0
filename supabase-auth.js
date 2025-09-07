@@ -1,4 +1,4 @@
-// supabase-auth.js (VERSÃO CORRIGIDA E FINAL)
+// supabase-auth.js (VERSÃO ATUALIZADA PARA NOVO FLUXO)
 
 class FitCraftAuth {
     constructor(supabaseClient) {
@@ -13,8 +13,13 @@ class FitCraftAuth {
         // Iniciar monitoramento de autenticação
         this.handleAuthStateChange();
         
-        // Verificar sessão inicial
-        this.checkInitialSession();
+        // Verificar sessão inicial apenas se não estivermos na página de entrada
+        const currentPath = window.location.pathname;
+        const isEntryPage = currentPath.endsWith('index.html') || currentPath === '/' || currentPath === '';
+        
+        if (!isEntryPage) {
+            this.checkInitialSession();
+        }
     }
 
     async checkInitialSession() {
@@ -29,26 +34,37 @@ class FitCraftAuth {
     handleAuthStateChange() {
         this.supabase.auth.onAuthStateChange((event, session) => {
             console.log('Auth event:', event, session ? 'com sessão' : 'sem sessão');
-            this.handleSession(session);
+            
+            // Não fazer redirecionamento automático na página de entrada
+            const currentPath = window.location.pathname;
+            const isEntryPage = currentPath.endsWith('index.html') || currentPath === '/' || currentPath === '';
+            
+            if (!isEntryPage) {
+                this.handleSession(session);
+            }
         });
     }
 
     handleSession(session) {
         const userIsLoggedIn = session && session.user;
         const currentPath = window.location.pathname;
-        const onAuthPage = currentPath.endsWith('login.html') || currentPath.endsWith('register.html') || currentPath === '/login.html' || currentPath === '/register.html';
+        const onAuthPage = currentPath.endsWith('login.html') || currentPath.endsWith('register.html');
+        const onDashboard = currentPath.endsWith('dashboard.html');
+        const onProtectedPage = !onAuthPage && !currentPath.endsWith('index.html') && currentPath !== '/' && currentPath !== '';
 
         console.log('Verificando sessão:', {
             userLoggedIn: !!userIsLoggedIn,
             currentPath,
-            onAuthPage
+            onAuthPage,
+            onDashboard,
+            onProtectedPage
         });
 
         if (userIsLoggedIn && onAuthPage) {
             // Usuário logado tentando acessar página de login/registro
             console.log('Redirecionando usuário logado para dashboard...');
-            window.location.replace('index.html');
-        } else if (!userIsLoggedIn && !onAuthPage) {
+            window.location.replace('dashboard.html');
+        } else if (!userIsLoggedIn && (onDashboard || onProtectedPage)) {
             // Usuário não logado tentando acessar página protegida
             console.log('Redirecionando usuário não logado para login...');
             window.location.replace('login.html');
@@ -144,3 +160,4 @@ if (document.readyState === 'loading') {
 } else {
     initFitCraftAuth();
 }
+
