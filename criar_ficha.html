@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Criar Ficha de Treino - FitCraft</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="FitCraft Personal">
+    <link rel="apple-touch-icon" href="images/icons/icon-152x152.png">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+           <button class="btn-voltar" onclick="window.location.href='index.html'" title="Voltar ao menu principal">
+                <img src="images/botao_voltar_sem_fundo.png" alt="Voltar">
+            </button>
+        </header>
+
+        <main class="content-section">
+            <!-- Card de Seleção do Aluno -->
+            <div class="form-card">
+                <h3>
+                    <span>👤</span>
+                    Selecionar Aluno
+                </h3>
+                <div class="form-group">
+                    <label for="select-aluno" class="form-label">Selecione o Aluno *</label>
+                    <select id="select-aluno" required class="form-input">
+                        <option value="">Carregando alunos...</option>
+                    </select>
+                </div>
+                
+                <!-- Seção de Fichas Existentes -->
+                <div id="fichas-existentes-section" style="display: none;">
+                    <h4 style="margin-top: 20px;">📋 Fichas de Treino Existentes</h4>
+                    <div id="lista-fichas-existentes">
+                        <!-- A lista de fichas será populada aqui pelo JavaScript -->
+                    </div>
+                    <div class="botoes-container">
+                        <button class="add-exercise-btn" id="btn-nova-ficha" type="button">
+                            ➕ Criar Nova Ficha
+                        </button>
+                        <button class="add-exercise-btn" id="btn-editar-ficha" type="button" style="background-color: #ffc107; color: #000;" disabled>
+                            ✏️ Editar Ficha
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card de Dados da Ficha -->
+            <div class="form-card" id="dados-ficha-section" style="display: none;">
+                <h3>
+                    <span>📋</span>
+                    Dados da Ficha
+                    <span id="modo-edicao" style="font-size: 14px; color: var(--cor-link  ); margin-left: 10px;"></span>
+                </h3>
+                <div class="grid-2-colunas">
+                    <div class="form-group">
+                        <label for="nome-ficha" class="form-label">Nome da Ficha *</label>
+                        <input type="text" id="nome-ficha" placeholder="Ex: Ficha A - Hipertrofia" required class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="data-troca" class="form-label">Data de Troca da Ficha *</label>
+                        <input type="date" id="data-troca" required class="form-input">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="observacoes-aluno" class="form-label">Observações (Opcional)</label>
+                    <textarea id="observacoes-aluno" placeholder="Ex: Lesões, limitações..." rows="3" class="form-input"></textarea>
+                </div>
+                <button class="add-exercise-btn" id="btn-cancelar-edicao" type="button" style="background-color: #6c757d;">
+                    ❌ Cancelar
+                </button>
+            </div>
+
+            <!-- Card de Adicionar Exercício -->
+            <div class="form-card" id="adicionar-exercicio-section" style="display: none;">
+                <h3>
+                    <span>💪</span>
+                    Adicionar Exercício
+                </h3>
+                <div class="form-group">
+                    <label for="grupo-muscular" class="form-label">Grupo Muscular *</label>
+                    <select id="grupo-muscular" required class="form-input">
+                        <option value="">Selecione o grupo muscular</option>
+                        <option value="peitoral">🫁 Peitoral</option>
+                        <option value="dorsais">🔙 Dorsais (Costas)</option>
+                        <option value="ombros">💪 Ombros (Deltoides)</option>
+                        <option value="biceps">💪 Bíceps</option>
+                        <option value="triceps">💪 Tríceps</option>
+                        <option value="quadriceps">🦵 Quadríceps</option>
+                        <option value="posteriores_de_coxa">🦵 Posteriores de Coxa</option>
+                        <option value="gluteos">🍑 Glúteos</option>
+                        <option value="panturrilhas">🦵 Panturrilhas</option>
+                        <option value="trapezio">🔺 Trapézio</option>
+                        <option value="eretores_da_espinha">🔙 Eretores da Espinha</option>
+                        <option value="cardio_academia">❤️ Cardio Academia</option>
+                        <option value="abdomen">🔥 Abdômen</option>
+                        <option value="antebracos">💪 Antebraços</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="exercicio" class="form-label">Exercício *</label>
+                    <select id="exercicio" disabled required class="form-input">
+                        <option value="">Primeiro selecione o grupo muscular</option>
+                    </select>
+                </div>
+                <div class="grid-2-colunas">
+                    <div class="form-group">
+                        <label for="series" class="form-label">Séries *</label>
+                        <input type="number" id="series" min="1" max="10" value="3" required class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="repeticoes" class="form-label">Repetições *</label>
+                        <input type="text" id="repeticoes" value="12" placeholder="Ex: 12, 8-12, 15+" required class="form-input">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="tecnica" class="form-label">Técnica Avançada (Opcional)</label>
+                    <select id="tecnica" class="form-input">
+                        <option value="">Nenhuma técnica</option>
+                        <option value="Drop set">🔥 Drop set</option>
+                        <option value="Rest-pause">⏸️ Rest-pause</option>
+                        <option value="Bi-set">🔄 Bi-set</option>
+                        <option value="Tri-set">🔄 Tri-set</option>
+                        <option value="Giant set">🔄 Giant set</option>
+                        <option value="Super-set">⚡ Super-set</option>
+                        <option value="Pré-exaustão">🎯 Pré-exaustão</option>
+                        <option value="Pós-exaustão">🎯 Pós-exaustão</option>
+                        <option value="Isometria">⏱️ Isometria</option>
+                        <option value="Parciais">📏 Parciais</option>
+                        <option value="Forçada">🤝 Forçada</option>
+                        <option value="Negativa">⬇️ Negativa</option>
+                        <option value="Cluster set">🔗 Cluster set</option>
+                        <option value="Piramidal crescente">📈 Piramidal crescente</option>
+                        <option value="Piramidal decrescente">📉 Piramidal decrescente</option>
+                        <option value="FST-7">7️⃣ FST-7</option>
+                    </select>
+                </div>
+                <button class="add-exercise-btn" onclick="adicionarExercicio()" type="button">
+                    ➕ Adicionar à Ficha
+                </button>
+            </div>
+
+            <!-- Card da Ficha de Treino Atual -->
+            <div class="form-card" id="ficha-atual-section" style="display: none;">
+                <h3>
+                    <span>📝</span>
+                    Ficha de Treino Atual
+                    <span id="nome-ficha-atual" style="font-size: 16px; color: var(--cor-link); margin-left: 10px;"></span>
+                </h3>
+                <div class="counter">0 exercício(s) adicionado(s)</div>
+                <div id="lista-exercicios">
+                    <div class="empty-state" style="text-align: center; padding: 40px; color: var(--texto-secundario);">
+                        <div style="font-size: 48px; margin-bottom: 1rem;">📋</div>
+                        <div><strong>Nenhum exercício adicionado ainda</strong>  
+Selecione exercícios para começar.</div>
+                    </div>
+                </div>
+                <div id="pdf-section" style="display: none;">
+                    <h4>🚀 Finalizar Ficha</h4>
+                    <p>Sua ficha está pronta! Salve a ficha online para o aluno acessar no app e, se desejar, gere um PDF para backup.</p>
+                    
+                    <!-- Container para os botões de finalizar -->
+                    <div class="botoes-finalizar">
+                        <button class="add-exercise-btn" id="btn-salvar-ficha" type="button">💾 Salvar Ficha Online</button>
+                        <button class="pdf-btn" id="btn-gerar-pdf" type="button">📄 Gerar PDF da Ficha</button>
+                    </div>
+
+                    <div class="loading" id="loading" style="display: none; text-align: center; margin-top: 1rem;">
+                        <div class="spinner"></div>
+                        <p>Processando...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts Externos -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+    <script src="criar_ficha_script.js"></script>
+</body>
+</html>

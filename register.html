@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>FitCraft Personal - Registro</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="images/icons/icon-152x152.png">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- PWA Keyboard Fix -->
+    <script src="pwa-keyboard-fix.js"></script>
+    
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .auth-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .auth-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .auth-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .auth-subtitle {
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 14px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .auth-button {
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-bottom: 15px;
+        }
+        
+        .auth-button:hover {
+            background: #5a67d8;
+        }
+        
+        .auth-button:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+        }
+        
+        .auth-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+        
+        .error-message {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .success-message {
+            background: #c6f6d5;
+            color: #2f855a;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-logo">FC</div>
+            <h1 class="auth-title">FitCraft</h1>
+            <p class="auth-subtitle">Crie sua conta para começar a gerenciar seus clientes</p>
+            
+            <div id="error-message" class="error-message"></div>
+            <div id="success-message" class="success-message"></div>
+            
+            <form id="register-form">
+                <div class="form-group">
+                    <label class="form-label" for="email">Email</label>
+                    <input type="email" id="email" class="form-input" placeholder="seu@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="password">Senha</label>
+                    <input type="password" id="password" class="form-input" placeholder="Sua senha" required minlength="6">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="confirm-password">Confirmar Senha</label>
+                    <input type="password" id="confirm-password" class="form-input" placeholder="Confirme sua senha" required minlength="6">
+                </div>
+                
+                <button type="submit" id="register-button" class="auth-button">Criar Conta</button>
+            </form>
+            
+            <p>
+                <a href="login.html" class="auth-link">Já tem conta? Faça login</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Supabase Auth Module -->
+    <script src="supabase-auth.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const registerForm = document.getElementById('register-form');
+            const registerButton = document.getElementById('register-button');
+            const errorMessage = document.getElementById('error-message');
+            const successMessage = document.getElementById('success-message');
+            
+            // Função para mostrar mensagem de erro
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+                successMessage.style.display = 'none';
+            }
+            
+            // Função para mostrar mensagem de sucesso
+            function showSuccess(message) {
+                successMessage.textContent = message;
+                successMessage.style.display = 'block';
+                errorMessage.style.display = 'none';
+            }
+            
+            // Função para limpar mensagens
+            function clearMessages() {
+                errorMessage.style.display = 'none';
+                successMessage.style.display = 'none';
+            }
+            
+            // Lidar com envio do formulário
+            registerForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                clearMessages();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+                
+                // Validação básica
+                if (!email || !password || !confirmPassword) {
+                    showError('Por favor, preencha todos os campos.');
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    showError('As senhas não coincidem.');
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    showError('A senha deve ter pelo menos 6 caracteres.');
+                    return;
+                }
+                
+                // Desabilitar botão durante o registro
+                registerButton.disabled = true;
+                registerButton.textContent = 'Criando conta...';
+                
+                try {
+                    const result = await fitCraftAuth.register(email, password);
+                    
+                    if (result.success) {
+                        showSuccess('Conta criada com sucesso! Redirecionando...');
+                        // Redirecionar será feito automaticamente pelo módulo de auth
+                    } else {
+                        showError(result.error || 'Erro ao criar conta. Tente novamente.');
+                    }
+                } catch (error) {
+                    showError('Erro inesperado. Tente novamente.');
+                    console.error('Erro no registro:', error);
+                } finally {
+                    // Reabilitar botão
+                    registerButton.disabled = false;
+                    registerButton.textContent = 'Criar Conta';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

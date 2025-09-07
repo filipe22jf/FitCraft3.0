@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>FitCraft Personal - Login</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="images/icons/icon-152x152.png">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <img src="images/fitcraft_logo.png" alt="FitCraft Logo" class="auth-logo">
+            <p class="auth-subtitle">Entre na sua conta para gerenciar seus clientes e fichas de treino</p>
+            
+            <div id="error-message" class="error-message" style="display: none; background: #ff4d4d; color: white; padding: 12px; border-radius: 8px; margin-bottom: 20px;"></div>
+            <div id="success-message" class="success-message" style="display: none; background: #28a745; color: white; padding: 12px; border-radius: 8px; margin-bottom: 20px;"></div>
+            
+            <form id="login-form">
+                <div class="form-group">
+                    <label class="form-label" for="email">Email</label>
+                    <input type="email" id="email" class="form-input" placeholder="seu@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="password">Senha</label>
+                    <input type="password" id="password" class="form-input" placeholder="Sua senha" required>
+                </div>
+                
+                <button type="submit" id="login-button" class="auth-button">Entrar</button>
+            </form>
+            
+            <p>
+                <a href="register.html" class="auth-link">Não tem conta? Registre-se</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- =============================================== -->
+    <!--           ORDEM DE SCRIPTS CORRIGIDA            -->
+    <!-- =============================================== -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script> <!-- 1. Cria a variável _supabase -->
+    <script src="supabase-auth.js"></script>   <!-- 2. Usa _supabase para criar fitCraftAuth -->
+    
+    <script>
+        // 3. Agora este script pode usar fitCraftAuth sem erro
+        document.addEventListener('DOMContentLoaded', function( ) {
+            const loginForm = document.getElementById('login-form');
+            const loginButton = document.getElementById('login-button');
+            const errorMessage = document.getElementById('error-message');
+            
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+            }
+            
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                errorMessage.style.display = 'none';
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                if (!email || !password) {
+                    showError('Por favor, preencha todos os campos.');
+                    return;
+                }
+                
+                loginButton.disabled = true;
+                loginButton.textContent = 'Entrando...';
+                
+                try {
+                    const result = await fitCraftAuth.login(email, password);
+                    if (!result.success) {
+                        showError(result.error || 'Erro ao fazer login. Verifique suas credenciais.');
+                    }
+                    // Se o login for bem-sucedido, o supabase-auth.js fará o redirecionamento.
+                } catch (error) {
+                    showError('Erro inesperado. Tente novamente.');
+                } finally {
+                    loginButton.disabled = false;
+                    loginButton.textContent = 'Entrar';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

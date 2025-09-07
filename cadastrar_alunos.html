@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <!-- Viewport corrigido para evitar zoom -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- Metas PWA -->
+    <title>Cadastrar Alunos - FitCraft</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="FitCraft Personal">
+    <link rel="apple-touch-icon" href="images/icons/icon-152x152.png">
+    <meta name="msapplication-TileImage" content="images/icons/icon-144x144.png">
+    <meta name="msapplication-TileColor" content="#2f3e5c">
+    
+    <!-- Chamada para o CSS externo -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Fontes -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <button class="btn-voltar" onclick="window.location.href='index.html'" title="Voltar ao menu principal" aria-label="Voltar ao menu principal">
+                <img src="images/botao_voltar_sem_fundo.png" alt="Voltar">
+            </button>
+        </header>
+
+        <main class="content-section">
+            <h1>Gerenciar Alunos</h1>
+            <p>Adicione novos alunos à sua base de clientes.</p>
+            
+            <section class="form-card" aria-labelledby="form-title">
+                <h2 id="form-title">Informações do Aluno</h2>
+                <form id="cadastro-form" novalidate>
+                    <div class="form-group">
+                        <label for="nome-aluno-cadastro" class="form-label">Nome Completo *</label>
+                        <input 
+                            type="text" 
+                            id="nome-aluno-cadastro" 
+                            name="nome-aluno"
+                            placeholder="Digite o nome do aluno"
+                            required
+                            autocomplete="name"
+                            class="form-input"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="data-cadastro" class="form-label">Data de Início</label>
+                        <input 
+                            type="date" 
+                            id="data-cadastro"
+                            name="data-inicio"
+                            class="form-input"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="valor-consultoria" class="form-label">Valor da Consultoria (R$ )</label>
+                        <input 
+                            type="number" 
+                            id="valor-consultoria"
+                            name="valor-consultoria" 
+                            placeholder="Ex: 150.00" 
+                            step="0.01"
+                            min="0"
+                            class="form-input"
+                        >
+                    </div>
+                    
+                    <button type="button" class="add-exercise-btn" id="btn-salvar-aluno">
+                        Salvar Aluno
+                    </button>
+                </form>
+            </section>
+
+            <section class="form-card" aria-labelledby="lista-title">
+                <h2 id="lista-title">Alunos Cadastrados</h2>
+                <div class="client-list-container">
+                    <ul id="lista-alunos-cadastrados" class="client-list" role="list" aria-live="polite">
+                        <!-- Alunos serão listados aqui -->
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal para exibir a credencial -->
+    <div id="credential-modal" class="modal" role="dialog" aria-labelledby="modal-title" aria-hidden="true" style="display: none;">
+        <div class="modal-content" style="background-color: var(--preto-card); border: 1px solid var(--borda-elementos);">
+            <button class="close-button" aria-label="Fechar modal" style="position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 2rem; color: var(--texto-principal); cursor: pointer;">&times;</button>
+            <h2 id="modal-title">Aluno Salvo com Sucesso!</h2>
+            <p>Compartilhe esta credencial com o aluno:</p>
+            <div class="credential-display" style="background-color: var(--preto-fundo); border: 1px solid var(--borda-elementos); padding: 1rem; border-radius: 8px; margin: 1rem 0; display: flex; justify-content: space-between; align-items: center;">
+                <span id="aluno-credencial" style="font-weight: bold; font-size: 1.2rem; color: var(--cor-destaque);"></span>
+                <button id="copy-credential-btn" title="Copiar" class="auth-button" style="width: auto; padding: 10px 15px; font-size: 14px;">
+                    Copiar
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+    <script src="cadastrar_alunos_script.js"></script>
+
+    <script>
+        // Script para fechar o modal
+        document.addEventListener('DOMContentLoaded', ( ) => {
+            const modal = document.getElementById('credential-modal');
+            const closeButton = modal.querySelector('.close-button');
+            
+            if(closeButton) {
+                closeButton.addEventListener('click', () => {
+                    modal.style.display = 'none';
+                });
+            }
+
+            window.addEventListener('click', (event) => {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
