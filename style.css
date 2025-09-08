@@ -32,7 +32,14 @@ body {
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 20px; /* Padding padrão para telas maiores */
+}
+
+/* --- MEDIA QUERY PARA CELULARES --- */
+@media (max-width: 768px) {
+    .container {
+        padding: 0; /* Remove o padding lateral em telas de celular */
+    }
 }
 
 /* 2. Header e NavegaÃ§Ã£o */
