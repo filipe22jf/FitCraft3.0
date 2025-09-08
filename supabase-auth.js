@@ -4,37 +4,38 @@ class FitCraftAuth {
         this.supabase = supabaseClient;
     }
 
-   initializeAuthListener() {
-    this.supabase.auth.onAuthStateChange((event, session) => {
-        console.log(`Auth Event: ${event}`);
-
-        const userIsLoggedIn = session && session.user;
-        const currentPath = window.location.pathname.split('/').pop();
-
-        if (userIsLoggedIn) {
-            // Se o usuário está logado, mas em uma página pública, redireciona.
-            if (currentPath === 'login.html' || currentPath === 'register.html' || currentPath === 'index.html' || currentPath === '') {
-                console.log('Usuário já logado. Redirecionando para o dashboard...');
+    // Esta função agora é o ponto de entrada principal do app
+    async handleInitialState() {
+        try {
+            const { data: { session } } = await this.supabase.auth.getSession();
+            if (session && session.user) {
+                console.log('Sessão ativa encontrada. Redirecionando para o dashboard...');
                 window.location.replace('dashboard.html');
-            }
-            // NADA MAIS AQUI. A responsabilidade agora é do dashboard.html
-
-        } else { // Se o usuário NÃO está logado
-            const isAuthPage = currentPath === 'login.html' || currentPath === 'register.html';
-            const isPublicIndex = currentPath === 'index.html' || currentPath === '';
-            
-            // Se ele tentar acessar uma página protegida, redireciona.
-            if (!isAuthPage && !isPublicIndex) {
-                console.log('Usuário não logado em página protegida. Redirecionando para o login...');
+            } else {
+                console.log('Nenhuma sessão ativa. Redirecionando para o login...');
                 window.location.replace('login.html');
             }
+        } catch (error) {
+            console.error('Erro crítico ao verificar sessão inicial. Redirecionando para login como segurança.', error);
+            window.location.replace('login.html');
         }
-    });
-}
+    }
+
+    // O listener de autenticação para páginas internas (como o dashboard)
+    initializeAuthListener() {
+        this.supabase.auth.onAuthStateChange((event, session) => {
+            console.log(`Auth Event: ${event}`);
+            if (event === 'SIGNED_OUT') {
+                window.location.replace('login.html');
+            }
+        });
+    }
+
     // Funções de login, logout, etc. permanecem as mesmas
     async login(email, password) {
         const { data, error } = await this.supabase.auth.signInWithPassword({ email, password });
         if (error) console.error('Erro no login:', error.message);
+        else window.location.replace('dashboard.html'); // Redireciona no sucesso
         return { success: !error, data, error };
     }
 
@@ -44,35 +45,32 @@ class FitCraftAuth {
         if (error) {
             console.error('Erro no logout:', error.message);
         }
+        // O onAuthStateChange vai pegar o SIGNED_OUT e redirecionar.
         return { success: !error, error };
-    }
-
-    async register(email, password) {
-        const { data, error } = await this.supabase.auth.signUp({ email, password });
-        if (error) console.error('Erro no registro:', error.message);
-        return { success: !error, data, error };
-    }
-
-    async getCurrentUser() {
-        const { data: { session }, error } = await this.supabase.auth.getSession();
-        if (error) {
-            console.error('Erro ao obter sessão:', error);
-            return null;
-        }
-        return session ? session.user : null;
     }
 }
 
-// Função de inicialização global (permanece a mesma)
+// Função de inicialização global
 function initializeAppAuth() {
     if (window._supabase) {
         window.fitCraftAuth = new FitCraftAuth(window._supabase);
-        window.fitCraftAuth.initializeAuthListener();
-        console.log('✅ FitCraft Auth e Listener inicializados');
+        console.log('✅ FitCraft Auth inicializado');
+
+        const currentPage = window.location.pathname.split('/').pop();
+
+        // Lógica de Roteamento Principal
+        if (currentPage === 'index.html' || currentPage === '') {
+            // Se estamos na página de entrada, verifica o estado e redireciona.
+            window.fitCraftAuth.handleInitialState();
+        } else {
+            // Se estamos em qualquer outra página, apenas escuta por eventos (como logout).
+            window.fitCraftAuth.initializeAuthListener();
+        }
     } else {
         console.log('Aguardando cliente Supabase...');
         setTimeout(initializeAppAuth, 100);
     }
 }
 
-document.addEventListener('DOMContentLoaded', initializeAppAuth);
+// Inicia tudo
+initializeAppAuth();
