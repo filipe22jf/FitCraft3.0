@@ -4,73 +4,58 @@ class FitCraftAuth {
         this.supabase = supabaseClient;
     }
 
-    // Esta função agora é o ponto de entrada principal do app
-    async handleInitialState() {
-        try {
-            const { data: { session } } = await this.supabase.auth.getSession();
-            if (session && session.user) {
-                console.log('Sessão ativa encontrada. Redirecionando para o dashboard...');
+    // Lida com o estado de autenticação em QUALQUER página.
+    async handleAuthState() {
+        const { data: { session } } = await this.supabase.auth.getSession();
+        const userIsLoggedIn = session && session.user;
+        const currentPage = window.location.pathname.split('/').pop();
+
+        if (userIsLoggedIn) {
+            // Se está logado e na página de login, redireciona para o dashboard.
+            if (currentPage === 'login.html') {
+                console.log('Sessão ativa detectada na página de login. Redirecionando para o dashboard...');
                 window.location.replace('dashboard.html');
-            } else {
-                console.log('Nenhuma sessão ativa. Redirecionando para o login...');
+            }
+        } else {
+            // Se NÃO está logado e TENTA acessar o dashboard, redireciona para o login.
+            if (currentPage === 'dashboard.html') {
+                console.log('Tentativa de acesso não autenticada ao dashboard. Redirecionando para o login...');
                 window.location.replace('login.html');
             }
-        } catch (error) {
-            console.error('Erro crítico ao verificar sessão inicial. Redirecionando para login como segurança.', error);
-            window.location.replace('login.html');
         }
     }
 
-    // O listener de autenticação para páginas internas (como o dashboard)
-    initializeAuthListener() {
-        this.supabase.auth.onAuthStateChange((event, session) => {
-            console.log(`Auth Event: ${event}`);
-            if (event === 'SIGNED_OUT') {
-                window.location.replace('login.html');
-            }
-        });
-    }
-
-    // Funções de login, logout, etc. permanecem as mesmas
     async login(email, password) {
         const { data, error } = await this.supabase.auth.signInWithPassword({ email, password });
-        if (error) console.error('Erro no login:', error.message);
-        else window.location.replace('dashboard.html'); // Redireciona no sucesso
-        return { success: !error, data, error };
+        if (error) {
+            console.error('Erro no login:', error.message);
+        } else {
+            // No sucesso, a handleAuthState fará o redirecionamento.
+            this.handleAuthState();
+        }
+        return { success: !error, error };
     }
 
     async logout() {
         console.log('Realizando logout...');
         const { error } = await this.supabase.auth.signOut();
         if (error) {
-            console.error('Erro no logout:', error.message);
+            console.error('Erro no logout:', error);
         }
-        // O onAuthStateChange vai pegar o SIGNED_OUT e redirecionar.
-        return { success: !error, error };
+        // Após o logout, redireciona para a página de login.
+        window.location.replace('login.html');
+        return { success: !error };
     }
 }
 
-// Função de inicialização global
-function initializeAppAuth() {
+// Inicialização
+document.addEventListener('DOMContentLoaded', () => {
     if (window._supabase) {
         window.fitCraftAuth = new FitCraftAuth(window._supabase);
         console.log('✅ FitCraft Auth inicializado');
-
-        const currentPage = window.location.pathname.split('/').pop();
-
-        // Lógica de Roteamento Principal
-        if (currentPage === 'index.html' || currentPage === '') {
-            // Se estamos na página de entrada, verifica o estado e redireciona.
-            window.fitCraftAuth.handleInitialState();
-        } else {
-            // Se estamos em qualquer outra página, apenas escuta por eventos (como logout).
-            window.fitCraftAuth.initializeAuthListener();
-        }
+        // Verifica o estado de autenticação assim que o app carrega.
+        window.fitCraftAuth.handleAuthState();
     } else {
-        console.log('Aguardando cliente Supabase...');
-        setTimeout(initializeAppAuth, 100);
+        console.error('Cliente Supabase não encontrado!');
     }
-}
-
-// Inicia tudo
-initializeAppAuth();
+});
