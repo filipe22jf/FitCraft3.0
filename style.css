@@ -109,9 +109,17 @@ body {
 
 /* 3. ConteÃºdo Principal e Cards */
 .main-content, .content-section {
-    padding: 2rem;
+    padding: 2rem; /* Padding padrão para telas maiores */
     max-width: 1200px;
     margin: 100px auto 0 auto;
+}
+
+/* --- MEDIA QUERY PARA CELULARES --- */
+@media (max-width: 768px) {
+    .main-content, .content-section {
+        padding: 1rem; /* Reduz o padding pela metade em telas de celular */
+        margin-top: 80px; /* Reduz um pouco a margem do topo também */
+    }
 }
 
 .card, .stat-card, .form-card {
