@@ -2,23 +2,14 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FitCraft Personal</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
+    <title>Carregando FitCraft...</title>
+    <script>
+        // Redireciona imediatamente para a página de login.
+        // A página de login então decidirá se o usuário deve ficar lá ou ir para o dashboard.
+        window.location.replace('./login.html');
+    </script>
 </head>
 <body>
-    <div class="loading-container">
-        <img src="images/fitcraft_logo.png" alt="FitCraft Logo" class="auth-logo" style="max-width: 200px; margin-bottom: 1rem;">
-        <div class="loading-spinner"></div>
-        <p class="loading-text">Carregando...</p>
-    </div>
-
-    <!-- Garante que o cliente Supabase seja carregado PRIMEIRO -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-client.js"></script>
-    
-    <!-- O script de autenticação é carregado por ÚLTIMO e faz todo o trabalho -->
-    <script src="supabase-auth.js"></script>
+    <p>Redirecionando...</p>
 </body>
 </html>
