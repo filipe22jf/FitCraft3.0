@@ -12,25 +12,25 @@
   "categories": ["fitness", "health", "productivity"],
   "icons": [
     {
-      "src": "fitcraft_logo.png",
+      "src": "images/fitcraft_logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "fitcraft_logo.png",
+      "src": "images/fitcraft_logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "fitcraft_logo.png",
+      "src": "images/fitcraft_logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "fitcraft_logo.png",
+      "src": "images/fitcraft_logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -38,13 +38,13 @@
   ],
   "screenshots": [
     {
-      "src": "screenshot-mobile.png",
+      "src": "images/screenshot-mobile.png",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow"
     },
     {
-      "src": "screenshot-desktop.png",
+      "src": "images/screenshot-desktop.png",
       "sizes": "1200x800",
       "type": "image/png", 
       "form_factor": "wide"

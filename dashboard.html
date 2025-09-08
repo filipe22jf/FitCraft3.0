@@ -481,22 +481,22 @@
         <div class="dashboard-grid" id="statsGrid">
             <div class="stat-card">
                 <div class="stat-icon">👥</div>
-                <div class="stat-value" id="totalClients">10</div>
+                <div class="stat-value" id="totalClients"></div>
                 <div class="stat-label">Total de Clientes</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">✅</div>
-                <div class="stat-value" id="activeClients">6</div>
+                <div class="stat-value" id="activeClients"></div>
                 <div class="stat-label">Clientes Ativos</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">📋</div>
-                <div class="stat-value" id="totalWorkouts">14</div>
+                <div class="stat-value" id="totalWorkouts"></div>
                 <div class="stat-label">Fichas de Treino</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">📈</div>
-                <div class="stat-value" id="monthlyGrowth">+300%</div>
+                <div class="stat-value" id="monthlyGrowth"></div>
                 <div class="stat-label">Crescimento Mensal</div>
             </div>
         </div>
@@ -543,155 +543,376 @@
     <script src="supabase-auth.js"></script>
     
     <script>
+        let meuDashboard;
         class MenuManager {
-            constructor() {
-                this.hamburger = document.getElementById('hamburger');
-                this.sidebar = document.getElementById('sidebar');
-                this.overlay = document.getElementById('sidebarOverlay');
-                this.init();
+    constructor() {
+        this.hamburger = document.getElementById('hamburger');
+        this.sidebar = document.getElementById('sidebar');
+        this.overlay = document.getElementById('sidebarOverlay');
+        this.init();
+    }
+    
+    init() {
+        if (!this.hamburger) return;
+        this.hamburger.addEventListener('click', () => this.toggleMenu());
+        this.overlay.addEventListener('click', () => this.closeMenu());
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.sidebar.classList.contains('active')) {
+                this.closeMenu();
             }
-            
-            init() {
-                if (!this.hamburger) return;
-                this.hamburger.addEventListener('click', () => this.toggleMenu());
-                this.overlay.addEventListener('click', () => this.closeMenu());
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape' && this.sidebar.classList.contains('active')) {
-                        this.closeMenu();
-                    }
-                });
-            }
-            
-            toggleMenu() {
-                this.hamburger.classList.toggle('active');
-                this.sidebar.classList.toggle('active');
-                this.overlay.classList.toggle('active');
-                document.body.style.overflow = this.sidebar.classList.contains('active') ? 'hidden' : 'auto';
-            }
-            
-            closeMenu() {
-                this.hamburger.classList.remove('active');
-                this.sidebar.classList.remove('active');
-                this.overlay.classList.remove('active');
-                document.body.style.overflow = 'auto';
-            }
+        });
+    }
+    
+    toggleMenu() {
+        this.hamburger.classList.toggle('active');
+        this.sidebar.classList.toggle('active');
+        this.overlay.classList.toggle('active');
+        document.body.style.overflow = this.sidebar.classList.contains('active') ? 'hidden' : 'auto';
+    }
+    
+    closeMenu() {
+        this.hamburger.classList.remove('active');
+        this.sidebar.classList.remove('active');
+        this.overlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// --- CLASSE 2: GERENCIADOR DO DASHBOARD (GRÁFICO) ---
+// --- CLASSE 2: GERENCIADOR DO DASHBOARD (GRÁFICO) ---
+class Dashboard {
+    constructor() {
+        this.chart = null;
+        this.canvas = document.getElementById('activityChart');
+        
+        // Se o canvas não existir, não faz mais nada
+        if (!this.canvas) {
+            console.error('Elemento canvas do gráfico não encontrado!');
+            return;
+        }
+        
+        // Inicializa o gráfico com dados vazios, pronto para ser preenchido
+        this.renderChart([], []); 
+    }
+
+    // NOVO MÉTODO: Permite que o gráfico seja atualizado de fora da classe
+    atualizarDadosDoGrafico(labels, data) {
+        if (!this.chart) return; // Garante que o gráfico existe
+
+        this.chart.data.labels = labels;
+        this.chart.data.datasets[0].data = data;
+        this.chart.update(); // O método mágico do Chart.js que redesenha com animação
+        
+        console.log('Gráfico atualizado com sucesso!');
+    }
+
+    renderChart(labels, data) {
+        const chartContext = this.canvas.getContext('2d');
+
+        // Destruir gráfico antigo se ele existir, para evitar conflitos
+        if (this.chart) {
+            this.chart.destroy();
         }
 
-        // Simulação do Dashboard (com dados de exemplo)
-        class Dashboard {
-            constructor() {
-                this.chart = null;
-                this.init();
-            }
-
-            async init() {
-                // Simula dados para demonstração
-                this.renderChart();
-            }
-
-            renderChart() {
-                const ctx = document.getElementById('activityChart');
-                if (!ctx) return;
-                
-                const chartContext = ctx.getContext('2d');
-                const labels = ['31/08', '01/09', '02/09', '03/09', '04/09', '05/09', '06/09'];
-                const data = [0, 0, 3, 4, 1, 0, 0];
-
-                if (this.chart) this.chart.destroy();
-
-                this.chart = new Chart(chartContext, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Fichas Criadas',
-                            data: data,
-                            backgroundColor: 'rgba(0, 255, 127, 0.6)',
-                            borderColor: 'rgba(0, 255, 127, 1)',
-                            borderWidth: 1,
-                            borderRadius: 5
-                        }]
+        this.chart = new Chart(chartContext, {
+            type: 'bar',
+            data: {
+                labels: labels, // Usa os rótulos recebidos
+                datasets: [{
+                    label: 'Planos Criados',
+                    data: data, // Usa os dados recebidos
+                    backgroundColor: 'rgba(0, 255, 127, 0.6)',
+                    borderColor: 'rgba(0, 255, 127, 1)',
+                    borderWidth: 1,
+                    borderRadius: 5
+                }]
+            },
+            options: { 
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        ticks: { color: '#808080', stepSize: 1 },
+                        grid: { color: '#2a2a2a' }
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: { 
-                                beginAtZero: true, 
-                                ticks: { 
-                                    color: '#808080', 
-                                    stepSize: 1 
-                                },
-                                grid: {
-                                    color: '#2a2a2a'
-                                }
-                            },
-                            x: { 
-                                ticks: { 
-                                    color: '#808080' 
-                                },
-                                grid: {
-                                    color: '#2a2a2a'
-                                }
-                            }
-                        },
-                        plugins: { 
-                            legend: { display: false } 
-                        }
+                    x: { 
+                        ticks: { color: '#808080' },
+                        grid: { color: '#2a2a2a' }
                     }
-                });
+                },
+                plugins: { 
+                    legend: { display: false } 
+                }
             }
+        });
+    }
+}
+// --- FUNÇÃO 1 DE DADOS: BUSCAR CLIENTES ---
+async function buscarTotalClientes() {
+  try {
+    const { count, error } = await _supabase
+      .from('clients')
+      .select('id', { count: 'exact', head: true });
+
+    if (error) {
+      throw error;
+    }
+    return count || 0;
+  } catch (err) {
+    console.error('Erro ao buscar o total de clientes:', err);
+    return 0;
+  }
+}
+
+// --- FUNÇÃO 2 DE DADOS: BUSCAR FICHAS ---
+async function buscarTotalFichas() {
+  try {
+    const { count, error } = await _supabase
+      .from('planos_de_treino')
+      .select('id', { count: 'exact', head: true });
+
+    if (error) {
+      throw error;
+    }
+    return count || 0;
+  } catch (err) {
+    console.error('Erro ao buscar o total de fichas:', err);
+    return 0;
+  }
+}
+
+async function buscarClientesAtivos() {
+  try {
+    // A lógica da data permanece a mesma
+    const dataDe30DiasAtras = new Date(new Date().setDate(new Date().getDate() - 30)).toISOString();
+
+    // Consulta corrigida com os nomes de colunas corretos
+    const { data, error } = await _supabase
+      .from('planos_de_treino')
+      .select('user_id') // <-- CORRIGIDO: Seleciona a coluna 'user_id'
+      .gte('data_troca', dataDe30DiasAtras); // <-- CORRIGIDO: Filtra pela coluna 'data_troca'
+
+    if (error) {
+      // Se houver um erro aqui, ele será mais específico agora
+      console.error("Erro detalhado ao buscar planos:", error);
+      throw error;
+    }
+
+    // A lógica de contagem única permanece a mesma, mas agora com a coluna correta
+    const clientesAtivos = new Set(data.map(item => item.user_id)).size;
+    return clientesAtivos;
+
+  } catch (err) {
+    console.error('Erro ao buscar clientes ativos:', err);
+    return 0;
+  }
+}
+
+async function buscarNovosClientesNoMes() {
+  try {
+    // A lógica da data está correta
+    const primeiroDiaDoMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+    
+    // A consulta agora usa o nome de coluna correto
+    const { data, error } = await _supabase
+      .from('clients')
+      .select('id')
+      // CORREÇÃO FINAL: Usando 'created_at' que existe na sua tabela
+      .gte('created_at', primeiroDiaDoMes); 
+
+    if (error) {
+      console.error("Erro detalhado ao buscar novos clientes:", error);
+      throw error;
+    }
+
+    // A lógica de contagem está correta
+    return data ? data.length : 0;
+    
+  } catch (err) {
+    console.error('Erro ao buscar novos clientes no mês:', err);
+    return 0;
+  }
+}
+
+async function buscarAtividadesRecentes() {
+  try {
+    const { data, error } = await _supabase
+      .from('planos_de_treino')
+      .select('name, client_name, data_troca')
+      .order('data_troca', { ascending: false })
+      .limit(4); // <-- AQUI ESTÁ O LIMITE
+
+    if (error) throw error;
+    
+    return data || [];
+  } catch (err) {
+    console.error('Erro ao buscar atividades recentes:', err);
+    return [];
+  }
+}
+
+async function atualizarAtividadesRecentes() {
+  const atividades = await buscarAtividadesRecentes(); // <-- Nome correto agora
+  renderizarAtividades(atividades);
+}
+
+function processarDadosDoGrafico(planos) {
+      const contagemPorDia = new Map();
+
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const chave = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+        contagemPorDia.set(chave, 0);
+      }
+
+      for (const plano of planos) {
+        const dataPlano = new Date(plano.data_troca);
+        const chave = `${String(dataPlano.getDate()).padStart(2, '0')}/${String(dataPlano.getMonth() + 1).padStart(2, '0')}`;
+        
+        if (contagemPorDia.has(chave)) {
+          contagemPorDia.set(chave, contagemPorDia.get(chave) + 1);
         }
+      }
 
-        // Verificação de autenticação antes de inicializar o dashboard
-        async function checkAuthAndInit() {
-            try {
-                // Aguardar cliente Supabase estar disponível
-                while (!window._supabase) {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
+      return {
+        labels: [...contagemPorDia.keys()],
+        data: [...contagemPorDia.values()],
+      };
+    }
 
-                // Verificar se o usuário está autenticado
-                const { data: { session } } = await window._supabase.auth.getSession();
-                
-                if (!session || !session.user) {
-                    // Usuário não autenticado, redirecionar para login
-                    console.log('Usuário não autenticado, redirecionando...');
-                    window.location.replace('login.html');
-                    return;
-                }
+    async function atualizarGraficoDeAtividade() {
+  console.log('Buscando dados para o gráfico...');
+  const planosRecentes = await buscarAtividadesRecentes();
+  console.log(`Encontrados ${planosRecentes.length} planos recentes.`);
 
-                console.log('Usuário autenticado, inicializando dashboard...');
-                
-                // Inicializar componentes do dashboard
-                new MenuManager();
-                new Dashboard();
+  // 2. Processa os dados para o formato do gráfico
+  const dadosDoGrafico = processarDadosDoGrafico(planosRecentes);
+  console.log('Dados do gráfico processados:', dadosDoGrafico);
 
-                // Configurar logout
-                const logoutButton = document.getElementById('logoutBtn');
-                if (logoutButton) {
-                    logoutButton.addEventListener('click', async () => {
-                        if (confirm('Tem certeza que deseja sair?')) {
-                            try {
-                                await window._supabase.auth.signOut();
-                                window.location.replace('login.html');
-                            } catch (error) {
-                                console.error('Erro no logout:', error);
-                                alert('Erro ao fazer logout. Tente novamente.');
-                            }
-                        }
-                    });
-                }
+  // 3. Renderiza o gráfico com os novos dados
+  // (Esta parte ainda não vai funcionar, mas vamos preparar o terreno)
+  if (window.meuDashboard && typeof window.meuDashboard.atualizarDadosDoGrafico === 'function') {
+    window.meuDashboard.atualizarDadosDoGrafico(dadosDoGrafico.labels, dadosDoGrafico.data);
+  } else {
+    console.log('A instância do Dashboard ou o método de atualização ainda não está pronto.');
+  }
+}
+function renderizarAtividades(atividades) {
+  const container = document.getElementById('recentActivities');
+  if (!container) {
+    console.error('Container de atividades recentes não encontrado!');
+    return;
+  }
 
-            } catch (error) {
-                console.error('Erro na verificação de autenticação:', error);
-                // Em caso de erro, redirecionar para login
-                window.location.replace('login.html');
-            }
-        }
+  // 1. Limpa o conteúdo de exemplo
+  container.innerHTML = '';
 
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', checkAuthAndInit);
+  // 2. Verifica se há atividades para mostrar
+  if (!atividades || atividades.length === 0) {
+    container.innerHTML = '<p style="color: var(--texto-secundario); text-align: center;">Nenhuma atividade recente encontrada.</p>';
+    return;
+  }
+
+  // 3. Cria e adiciona cada novo item de atividade
+  atividades.forEach(atividade => {
+    // Formata a data para DD/MM/YYYY
+    const data = new Date(atividade.data_troca);
+    // Adiciona 1 ao getUTCDate para corrigir o fuso horário de forma simples
+    const dataFormatada = `${String(data.getUTCDate()).padStart(2, '0')}/${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()}`;
+
+    const activityElement = document.createElement('div');
+    activityElement.className = 'activity-item';
+    activityElement.innerHTML = `
+      <div class="activity-avatar">📋</div>
+      <div class="activity-info">
+        <div><strong>${atividade.name || 'Plano sem nome'}</strong> para <strong>${atividade.client_name || 'Cliente sem nome'}</strong></div>
+        <div style="color: var(--texto-secundario); font-size: 0.9rem;">Criada em: ${dataFormatada}</div>
+      </div>
+    `;
+    container.appendChild(activityElement);
+  });
+}
+
+// --- FUNÇÃO 3 DE DADOS: POPULAR OS CARDS ---
+// --- FUNÇÃO 3 DE DADOS: POPULAR OS CARDS (VERSÃO COMPLETA) ---
+async function popularCardsDeEstatisticas() {
+  // Mapeamento dos elementos do DOM
+  const elements = {
+    totalClients: document.getElementById('totalClients'),
+    activeClients: document.getElementById('activeClients'),
+    totalWorkouts: document.getElementById('totalWorkouts'),
+    monthlyGrowth: document.getElementById('monthlyGrowth')
+  };
+
+  // Exibir "..." em todos os cards enquanto carrega
+  for (const key in elements) {
+    if (elements[key]) {
+      elements[key].textContent = '...';
+    }
+  }
+
+  try {
+    // Chamar todas as quatro funções de busca em paralelo
+    const [
+      totalClientes,
+      totalFichas,
+      clientesAtivos,
+      novosClientes
+    ] = await Promise.all([
+      buscarTotalClientes(),
+      buscarTotalFichas(),
+      buscarClientesAtivos(),
+      buscarNovosClientesNoMes()
+    ]);
+
+    // Atualizar o HTML com todos os resultados
+    if (elements.totalClients) elements.totalClients.textContent = totalClientes;
+    if (elements.totalWorkouts) elements.totalWorkouts.textContent = totalFichas;
+    if (elements.activeClients) elements.activeClients.textContent = clientesAtivos;
+    if (elements.monthlyGrowth) elements.monthlyGrowth.textContent = `+${novosClientes}`;
+
+  } catch (err) {
+    console.error('Erro ao popular os cards de estatísticas:', err);
+    // Em caso de erro, exibir uma mensagem de erro em todos os cards
+    for (const key in elements) {
+      if (elements[key]) {
+        elements[key].textContent = 'Erro';
+      }
+    }
+  }
+}
+// --- FUNÇÃO PRINCIPAL DE INICIALIZAÇÃO DA PÁGINA ---
+ async function checkAuthAndInit() {
+     console.log('Inicializando componentes visuais do dashboard...');
+     
+     new MenuManager();
+     meuDashboard = new Dashboard();
+
+     // Executa todas as atualizações de dados em paralelo para mais velocidade
+     await Promise.all([
+         popularCardsDeEstatisticas(),
+         atualizarGraficoDeAtividade(),
+         atualizarAtividadesRecentes() // <-- NOSSA NOVA FUNÇÃO
+     ]);
+
+     console.log('Dashboard totalmente carregado!');
+
+     // Configurar o botão de logout
+     const logoutButton = document.getElementById('logoutBtn');
+     if (logoutButton) {
+         logoutButton.addEventListener('click', async () => {
+             if (confirm('Tem certeza que deseja sair?')) {
+                 await window.fitCraftAuth.logout();
+             }
+         });
+     }
+ }
+
+// O addEventListener que chama esta função já está correto.
+document.addEventListener('DOMContentLoaded', checkAuthAndInit);
+
     </script>
 </body>
 </html>
