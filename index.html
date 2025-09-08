@@ -118,65 +118,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Scripts -->
-    <script src="supabase-client.js"></script>
-    
-    <script>
-        // Aguardar o cliente Supabase estar disponível
-        function waitForSupabase() {
-            return new Promise((resolve) => {
-                if (window._supabase) {
-                    resolve();
-                } else {
-                    setTimeout(() => waitForSupabase().then(resolve), 100);
-                }
-            });
-        }
-
-        // Função principal de verificação de autenticação
-        async function checkAuth() {
-            try {
-                // Esconder mensagem de erro se estiver visível
-                document.getElementById('errorContainer').style.display = 'none';
-                
-                // Aguardar cliente Supabase
-                await waitForSupabase();
-                
-                console.log('Cliente Supabase carregado, verificando sessão...');
-                
-                // Verificar sessão atual
-                const { data: { session }, error } = await window._supabase.auth.getSession();
-                
-                if (error) {
-                    throw new Error(`Erro ao verificar sessão: ${error.message}`);
-                }
-                
-                if (session && session.user) {
-                    console.log('Usuário autenticado, redirecionando para dashboard...');
-                    // Usuário está logado, redirecionar para dashboard
-                    window.location.replace('dashboard.html');
-                } else {
-                    console.log('Usuário não autenticado, redirecionando para login...');
-                    // Usuário não está logado, redirecionar para login
-                    window.location.replace('login.html');
-                }
-                
-            } catch (error) {
-                console.error('Erro na verificação de autenticação:', error);
-                
-                // Mostrar mensagem de erro
-                document.getElementById('errorMessage').textContent = error.message;
-                document.getElementById('errorContainer').style.display = 'block';
-            }
-        }
-
-        // Iniciar verificação quando a página carregar
-        document.addEventListener('DOMContentLoaded', () => {
-            // Aguardar um pouco para garantir que tudo está carregado
-            setTimeout(checkAuth, 500);
-        });
-    </script>
 </body>
 </html>
 
