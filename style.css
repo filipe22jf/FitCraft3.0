@@ -471,8 +471,8 @@ body {
      * Isso vai "alargar" o conteúdo, mantendo a estrutura de cards.
     */
     .main-content, .content-section {
-        padding-left: 10px;  /* << MUDANÇA PRINCIPAL */
-        padding-right: 10px; /* << MUDANÇA PRINCIPAL */
+        padding-left: 5px;  /* << MUDANÇA PRINCIPAL */
+        padding-right: 5px; /* << MUDANÇA PRINCIPAL */
         padding-top: 1rem;
         padding-bottom: 1rem;
         margin-top: 70px;
