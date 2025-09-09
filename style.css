@@ -188,7 +188,11 @@ body {
 .form-group { margin-bottom: 20px; text-align: left; }
 .form-label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--texto-secundario); }
 
-.form-input, .form-group select, .form-group textarea {
+/* 
+ * CORREÇÃO: Garante que todos os inputs dentro de um .form-group,
+ * incluindo os de data, número, etc., tenham a mesma aparência.
+*/
+.form-group input {
     width: 100%;
     padding: 15px;
     border: 1px solid var(--borda-elementos);
@@ -196,7 +200,12 @@ body {
     font-size: 16px;
     background-color: var(--preto-fundo);
     color: var(--texto-principal);
+    font-family: 'Montserrat', sans-serif; /* Garante a mesma fonte */
+    -webkit-appearance: none; /* Remove estilos padrão do iOS */
+    -moz-appearance: none;    /* Remove estilos padrão do Firefox */
+    appearance: none;         /* Remove estilos padrão de outros navegadores */
 }
+
 
 .form-input:focus, .form-group select:focus, .form-group textarea:focus {
     outline: none;
@@ -432,44 +441,49 @@ body {
     }
 }
 /* ================================================== */
-/*   10. RESPONSIVIDADE GERAL (TABLET E MOBILE)       */
+/*   10. RESPONSIVIDADE GERAL (VERSÃO AJUSTADA)       */
 /* ================================================== */
 
 /* --- Estilos para Tablets (768px de largura ou menos) --- */
 @media (max-width: 768px) {
-    /* Reduz o padding geral para dar mais espaço ao conteúdo */
     .main-content, .content-section {
-        padding: 1.5rem; /* De 2rem para 1.5rem */
-        margin-top: 80px; /* Menor margem no topo */
+        padding: 1.5rem;
+        margin-top: 80px;
     }
 
     .card, .stat-card, .form-card {
-        padding: 1.25rem; /* Reduz o padding dos cards */
+        padding: 1.25rem;
     }
 
     h1 {
-        font-size: 1.8rem; /* Diminui um pouco o título principal */
+        font-size: 1.8rem;
     }
 
-    /* Ajusta os botões de ação na lista de alunos */
     .client-item-list {
-        flex-direction: column; /* Empilha as informações e os botões */
-        align-items: flex-start; /* Alinha tudo à esquerda */
+        flex-direction: column;
+        align-items: flex-start;
         gap: 1rem;
     }
 
     .client-actions {
-        width: 100%; /* Faz os botões ocuparem a largura toda */
-        justify-content: flex-end; /* Alinha os botões à direita */
+        width: 100%;
+        justify-content: flex-end;
     }
 }
 
 
 /* --- Estilos para Celulares (480px de largura ou menos) --- */
 @media (max-width: 480px) {
-    /* Reduz ainda mais o padding para telas pequenas */
+    /* 
+     * AQUI ESTÁ O AJUSTE FINO:
+     * Reduzimos o padding lateral para apenas 10px.
+     * Isso vai "alargar" o conteúdo, mantendo a estrutura de cards.
+    */
     .main-content, .content-section {
-        padding: 1rem; /* De 1.5rem para 1rem */
+        padding-left: 10px;  /* << MUDANÇA PRINCIPAL */
+        padding-right: 10px; /* << MUDANÇA PRINCIPAL */
+        padding-top: 1rem;
+        padding-bottom: 1rem;
         margin-top: 70px;
     }
 
@@ -481,7 +495,6 @@ body {
         font-size: 1.5rem;
     }
 
-    /* Ajusta os inputs e botões do formulário */
     .form-input, .form-group select, .form-group textarea {
         padding: 12px;
         font-size: 15px;
@@ -492,12 +505,9 @@ body {
         font-size: 15px;
     }
 
-    /* Garante que os botões de ação fiquem bem distribuídos */
     .client-actions {
         display: grid;
-        grid-template-columns: 1fr 1fr; /* Cria duas colunas de tamanho igual */
+        grid-template-columns: 1fr 1fr;
         gap: 0.5rem;
     }
 }
-
-
