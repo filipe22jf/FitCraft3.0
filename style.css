@@ -188,11 +188,7 @@ body {
 .form-group { margin-bottom: 20px; text-align: left; }
 .form-label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--texto-secundario); }
 
-/* 
- * CORREÇÃO: Garante que todos os inputs dentro de um .form-group,
- * incluindo os de data, número, etc., tenham a mesma aparência.
-*/
-.form-group input {
+.form-input, .form-group select, .form-group textarea {
     width: 100%;
     padding: 15px;
     border: 1px solid var(--borda-elementos);
@@ -200,12 +196,7 @@ body {
     font-size: 16px;
     background-color: var(--preto-fundo);
     color: var(--texto-principal);
-    font-family: 'Montserrat', sans-serif; /* Garante a mesma fonte */
-    -webkit-appearance: none; /* Remove estilos padrão do iOS */
-    -moz-appearance: none;    /* Remove estilos padrão do Firefox */
-    appearance: none;         /* Remove estilos padrão de outros navegadores */
 }
-
 
 .form-input:focus, .form-group select:focus, .form-group textarea:focus {
     outline: none;
