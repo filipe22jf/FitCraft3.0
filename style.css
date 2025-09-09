@@ -32,14 +32,7 @@ body {
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px; /* Padding padrão para telas maiores */
-}
-
-/* --- MEDIA QUERY PARA CELULARES --- */
-@media (max-width: 768px) {
-    .container {
-        padding: 0; /* Remove o padding lateral em telas de celular */
-    }
+    padding: 20px;
 }
 
 /* 2. Header e NavegaÃ§Ã£o */
@@ -109,17 +102,9 @@ body {
 
 /* 3. ConteÃºdo Principal e Cards */
 .main-content, .content-section {
-    padding: 2rem; /* Padding padrão para telas maiores */
+    padding: 2rem;
     max-width: 1200px;
     margin: 100px auto 0 auto;
-}
-
-/* --- MEDIA QUERY PARA CELULARES --- */
-@media (max-width: 768px) {
-    .main-content, .content-section {
-        padding: 1rem; /* Reduz o padding pela metade em telas de celular */
-        margin-top: 80px; /* Reduz um pouco a margem do topo também */
-    }
 }
 
 .card, .stat-card, .form-card {
@@ -298,24 +283,87 @@ body {
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* Estilos especÃ­ficos para outras pÃ¡ginas */
+/* ================================================== */
+/*   9. ESTILOS PARA GERENCIAR ALUNOS (NOVO)          */
+/* ================================================== */
+
+/* Ajusta o item da lista para usar Flexbox */
 .client-item-list {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    margin-bottom: 16px;
+    justify-content: space-between; /* Empurra o conteúdo e os botões para as extremidades */
+    align-items: center; /* Alinha tudo verticalmente */
+    flex-wrap: wrap; /* Permite que os botões quebrem a linha em telas pequenas */
+    gap: 1rem; /* Espaço entre as informações e os botões */
+    padding: 1rem; /* Reduzido para um visual mais compacto */
+    margin-bottom: 1rem;
     background-color: var(--preto-card);
     border-radius: 12px;
     border-left: 4px solid var(--cor-destaque);
 }
-.remove-client-btn {
-    background-color: var(--cor-perigo);
+
+/* Agrupa as informações do cliente (nome, credencial, valor) */
+.client-info {
+    display: flex;
+    flex-direction: column; /* Empilha as informações umas sobre as outras */
+    gap: 0.25rem; /* Pequeno espaço entre as linhas de informação */
+    flex-grow: 1; /* Permite que esta área cresça e ocupe o espaço disponível */
+}
+
+/* Estiliza o nome do cliente para ter mais destaque */
+.client-info span {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--texto-principal);
+}
+
+/* Estiliza os detalhes (credencial, valor) */
+.client-info small {
+    font-size: 0.85rem;
+    color: var(--texto-secundario);
+}
+
+/* Agrupa os botões de ação */
+.client-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* Espaço entre os botões */
+    flex-shrink: 0; /* Impede que os botões encolham */
+}
+
+/* Estilo para o botão de "Desativar Acesso" (substitui .remove-client-btn) */
+.disable-access-btn {
+    background-color: var(--cor-aviso); /* Amarelo para aviso */
+    color: var(--preto-fundo);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    transition: background-color 0.3s;
+}
+
+.disable-access-btn:hover {
+    background-color: #ffdb58; /* Amarelo mais claro */
+}
+
+/* Estilo para o botão de "Excluir" */
+.delete-client-btn {
+    background-color: var(--cor-perigo); /* Rosa/Vermelho para perigo */
     color: var(--texto-principal);
     border: none;
     border-radius: 8px;
-    padding: 10px 16px;
+    padding: 8px 12px;
     cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    transition: background-color 0.3s;
 }
+
+.delete-client-btn:hover {
+    background-color: #c71585; /* Rosa mais escuro */
+}
+
 
 /* 7. ESTILOS PARA A LISTA DE FICHAS */
 .fichas-container {
