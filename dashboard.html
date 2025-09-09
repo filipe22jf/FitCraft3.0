@@ -1302,15 +1302,30 @@
                 debugLog('Dashboard carregado completamente!');
 
                 // Configurar logout
-                const logoutButton = document.getElementById('logoutBtn');
+                 const logoutButton = document.getElementById('logoutBtn');
                 if (logoutButton) {
                     logoutButton.addEventListener('click', async () => {
                         if (confirm('Tem certeza que deseja sair?')) {
-                            // Se tiver sistema de auth configurado
-                            if (window.fitCraftAuth && typeof window.fitCraftAuth.logout === 'function') {
-                                await window.fitCraftAuth.logout();
+                            debugLog('Iniciando processo de logout...');
+                            
+                            // Verifica se o Supabase está inicializado
+                            if (_supabase) {
+                                // Chama a função de signOut do Supabase
+                                const { error } = await _supabase.auth.signOut();
+
+                                if (error) {
+                                    // Se der erro, avisa o usuário mas tenta redirecionar mesmo assim
+                                    debugLog('Erro ao fazer logout no Supabase:', error);
+                                    showMessage('Erro ao encerrar a sessão. Tente novamente.', 'error');
+                                } else {
+                                    // Se o logout for bem-sucedido, limpa o console e redireciona
+                                    debugLog('Logout realizado com sucesso. Redirecionando...');
+                                    console.clear(); // Limpa o console para a próxima sessão de login
+                                    window.location.href = 'index.html'; // Redireciona para a página de login
+                                }
                             } else {
-                                // Redirecionar para página de login ou home
+                                // Fallback caso o Supabase não esteja disponível
+                                debugLog('Supabase não inicializado. Redirecionando diretamente.');
                                 window.location.href = 'index.html';
                             }
                         }
@@ -1399,5 +1414,6 @@
     </script>
 </body>
 </html>
+
 
 
