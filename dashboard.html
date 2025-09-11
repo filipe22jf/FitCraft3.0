@@ -845,35 +845,34 @@
 
         // Função para buscar clientes ativos (melhorada)
         async function buscarClientesAtivos() {
-            try {
-                if (!_supabase) {
-                    debugLog('Usando dados simulados para clientes ativos');
-                    return Math.floor(Math.random() * 20) + 5;
-                }
-
-                debugLog('Buscando clientes ativos...');
-                
-                const dataDe30DiasAtras = new Date();
-                dataDe30DiasAtras.setDate(dataDe30DiasAtras.getDate() - 30);
-
-                const { count, error } = await _supabase
-                    .from('clients')
-                    .select('*', { count: 'exact', head: true })
-                    .gte('created_at', dataDe30DiasAtras.toISOString());
-
-                if (error) {
-                    debugLog('Erro ao buscar clientes ativos', error);
-                    return Math.floor(Math.random() * 15) + 3; // Fallback
-                }
-
-                debugLog(`Clientes ativos encontrados: ${count}`);
-                return count || 0;
-                
-            } catch (err) {
-                debugLog('Erro ao buscar clientes ativos', err);
-                return Math.floor(Math.random() * 15) + 3; // Fallback
-            }
+    try {
+        if (!_supabase) {
+            console.log('[DEBUG] Usando dados simulados para clientes ativos');
+            return Math.floor(Math.random() * 20) + 5;
         }
+
+        console.log('[DEBUG] Buscando clientes ativos (com credencial)...');
+        
+        // A MÁGICA ACONTECE AQUI:
+        // Contamos apenas os clientes onde a coluna 'credencial' NÃO É nula.
+        const { count, error } = await _supabase
+            .from('clients')
+            .select('*', { count: 'exact', head: true })
+            .not('credencial', 'is', null); // Filtro para não nulos
+
+        if (error) {
+            console.error('[DEBUG] Erro ao buscar clientes ativos', error);
+            return 0; // Retorna 0 em caso de erro
+        }
+
+        console.log(`[DEBUG] Clientes ativos encontrados: ${count}`);
+        return count || 0;
+        
+    } catch (err) {
+        console.error('[DEBUG] Erro catastrófico ao buscar clientes ativos', err);
+        return 0;
+    }
+}
 
         // Função para buscar novos clientes do mês
         async function buscarNovosClientesNoMes() {
@@ -1149,6 +1148,33 @@
             
             debugLog('=== FIM DA ATUALIZAÇÃO DO GRÁFICO ===');
         }
+
+        function atualizarRelogio() {
+    const cardFichas = document.querySelector('#totalWorkouts').closest('.stat-card');
+    if (!cardFichas) return;
+
+    const agora = new Date();
+    
+    const dia = String(agora.getDate()).padStart(2, '0');
+    const mes = String(agora.getMonth() + 1).padStart(2, '0'); // Meses são de 0 a 11
+    const ano = agora.getFullYear();
+    
+    const hora = String(agora.getHours()).padStart(2, '0');
+    const minuto = String(agora.getMinutes()).padStart(2, '0');
+
+    // Monta o novo conteúdo do card
+    cardFichas.innerHTML = `
+        <div class="stat-icon" style="font-size: 1.5rem;">📅</div>
+        <div class="stat-value" style="font-size: 1.7rem; color: var(--texto-principal);">${dia}/${mes}/${ano}</div>
+        <div class="stat-label" style="font-size: 1.5rem; color: var(--texto-secundario); margin-top: 5px;">${hora}:${minuto}</div>
+    `;
+}
+
+// 1. Chama a função imediatamente para que o relógio apareça na hora.
+atualizarRelogio();
+
+// 2. Configura um intervalo para atualizar o relógio a cada segundo.
+setInterval(atualizarRelogio, 1000);
 
         // Função para atualizar atividades recentes
         async function atualizarAtividadesRecentes() {
