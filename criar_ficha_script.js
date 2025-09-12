@@ -16,8 +16,41 @@ let modoAgrupamento = {
 // --- FUNÇÕES DE LÓGICA ---
 function uniqueSorted(arr) { return Array.from(new Set(arr)).sort((a, b) => a.localeCompare(b, 'pt-BR')); }
 function classificarPernas(nome) { const n = nome.toLowerCase(); const quadKeys = ['extensor', 'extensora', 'agach', 'leg press', 'passada', 'afundo', 'bulgaro', 'búlgaro', 'frontal', 'hack']; const postKeys = ['flexor', 'flexora', 'stiff', 'levantamento terra', 'romeno', 'mesa flexora']; if (postKeys.some(k => n.includes(k))) return 'posteriores_de_coxa'; if (quadKeys.some(k => n.includes(k))) return 'quadriceps'; return 'quadriceps'; }
-function construirMapa(data) { const mapa = { peitoral: [], dorsais: [], ombros: [], biceps: [], triceps: [], quadriceps: [], posteriores_de_coxa: [], gluteos: [], panturrilhas: [], trapezio: [], eretores_da_espinha: [], cardio_academia: [], abdomen: [], antebracos: [] }; for (const item of data) { const cat = (item.category || '').toLowerCase(); const nome = item.name || ''; if (!nome) continue; if (cat.includes('peitoral')) mapa.peitoral.push(nome); else if (cat.includes('costas') || cat.includes('dorsais')) mapa.dorsais.push(nome); else if (cat.includes('ombros')) mapa.ombros.push(nome); else if (cat.includes('bíceps') || cat.includes('biceps')) mapa.biceps.push(nome); else if (cat.includes('tríceps') || cat.includes('triceps')) mapa.triceps.push(nome); else if (cat.includes('pernas')) mapa[classificarPernas(nome)].push(nome); else if (cat.includes('glúteos') || cat.includes('gluteos')) mapa.gluteos.push(nome); else if (cat.includes('panturr')) mapa.panturrilhas.push(nome); else if (cat.includes('trapézio') || cat.includes('trapezio')) mapa.trapezio.push(nome); else if (cat.includes('eretores')) mapa.eretores_da_espinha.push(nome); else if (cat.includes('cardio')) mapa.cardio_academia.push(nome); else if (cat.includes('abdômen') || cat.includes('abdomen')) mapa.abdomem.push(nome); else if (cat.includes('antebra')) mapa.antebracos.push(nome); } for (const k of Object.keys(mapa)) { mapa[k] = uniqueSorted(mapa[k]); } return mapa; }
-async function carregarExerciciosDoSite() { const url = 'https://exercicios-mauve.vercel.app/gif_index.json'; try { const resp = await fetch(url ); const data = await resp.json(); return construirMapa(data); } catch (e) { console.error('Falha ao carregar exercícios do site:', e); return null; } }
+function construirMapa(data) { const mapa = { peitoral: [], dorsais: [], ombros: [], biceps: [], triceps: [], quadriceps: [], posteriores_de_coxa: [], gluteos: [], panturrilhas: [], trapezio: [], eretores_da_espinha: [], cardio_academia: [], abdomen: [], antebracos: [] }; for (const item of data) { const cat = (item.category || '').toLowerCase(); const nome = item.name || ''; if (!nome) continue; if (cat.includes('peitoral')) mapa.peitoral.push(nome); else if (cat.includes('costas') || cat.includes('dorsais')) mapa.dorsais.push(nome); else if (cat.includes('ombros')) mapa.ombros.push(nome); else if (cat.includes('bíceps') || cat.includes('biceps')) mapa.biceps.push(nome); else if (cat.includes('tríceps') || cat.includes('triceps')) mapa.triceps.push(nome); else if (cat.includes('pernas')) mapa[classificarPernas(nome)].push(nome); else if (cat.includes('glúteos') || cat.includes('gluteos')) mapa.gluteos.push(nome); else if (cat.includes('panturr')) mapa.panturrilhas.push(nome); else if (cat.includes('trapézio') || cat.includes('trapezio')) mapa.trapezio.push(nome); else if (cat.includes('eretores')) mapa.eretores_da_espinha.push(nome); else if (cat.includes('cardio')) mapa.cardio_academia.push(nome); else if (cat.includes('abdômen') || cat.includes('abdomen')) mapa.abdomen.push(nome); else if (cat.includes('antebra')) mapa.antebracos.push(nome); } for (const k of Object.keys(mapa)) { mapa[k] = uniqueSorted(mapa[k]); } return mapa; }
+// NO ARQUIVO: criar_ficha_script.js
+
+async function carregarExerciciosDoSite() {
+    const url = 'https://exercicios-mauve.vercel.app/gif_index.json';
+    try {
+        const resp = await fetch(url );
+        
+        // Verifica se a requisição foi bem-sucedida (status 200-299)
+        if (!resp.ok) {
+            // Se não foi, lança um erro para ser pego pelo catch
+            throw new Error(`Falha na rede: status ${resp.status}`);
+        }
+
+        const data = await resp.json();
+
+        // --- INÍCIO DA CORREÇÃO ---
+        // VERIFICAÇÃO DE SEGURANÇA: Garante que 'data' é um array antes de continuar.
+        if (!Array.isArray(data)) {
+            console.error('Os dados de exercícios carregados do site não são um array válido.', data);
+            // Retorna null para que a falha possa ser tratada.
+            return null;
+        }
+        // --- FIM DA CORREÇÃO ---
+
+        // Se tudo deu certo, constrói o mapa e retorna.
+        return construirMapa(data);
+
+    } catch (e) {
+        console.error('Falha ao carregar ou processar exercícios do site:', e);
+        // Retorna null em caso de qualquer erro (rede, JSON inválido, etc.)
+        return null;
+    }
+}
+
 const tecnicasDescricoes = { "Drop set": "Realizar o exercício até a falha e reduzir o peso para continuar até a falha novamente.", "Rest-pause": "Ir até a falha, descansar 10–20s e continuar com o mesmo peso.", "Bi-set": "Dois exercícios em sequência sem descanso.", "Tri-set": "Três exercícios em sequência sem descanso.", "Giant set": "Quatro ou mais exercícios em sequência sem descanso.", "Super-set": "Dois exercícios de grupos opostos sem descanso.", "Pré-exaustão": "Exercício isolado antes do composto para o mesmo músculo.", "Pós-exaustão": "Exercício isolado após o composto para o mesmo músculo.", "Isometria": "Manter a contração por tempo definido.", "Parciais": "Repetições com amplitude reduzida na parte mais difícil.", "Forçada": "Ajuda do parceiro nas últimas repetições.", "Negativa": "Ênfase na fase excêntrica, descendo de forma lenta.", "Cluster set": "Dividir a série em mini-blocos com pequenos descansos.", "Piramidal crescente": "Aumenta peso e reduz repetições a cada série.", "Piramidal decrescente": "Reduz peso e aumenta repetições a cada série.", "FST-7": "7 séries de 10–15 repetições com 30–45s de descanso, geralmente no final." };
 function formatGrupoForPDF(grupo) { const g = (grupo || '').toLowerCase(); if (g.includes('dorsais') || g.includes('costas')) { return '(costas)'; } else if (g.includes('ombros (deltoides)')) { return '(deltoides)'; } return `(${g.replace(/[^a-z\s]/gi, '')})`; }
 
@@ -140,12 +173,19 @@ async function popularFichasExistentes(alunoId) {
         listaFichasDiv.innerHTML = '<p>Selecione um aluno para ver as fichas.</p>';
         return;
     }
-
+    const { data: { user } } = await _supabase.auth.getUser();
+    if (!user) {
+        alert('Sessão expirada. Faça login novamente.');
+        listaFichasDiv.innerHTML = '<p>Sessão inválida.</p>';
+        return;
+    }
+    const personalId = user.id;
     const { data: workoutPlans, error } = await _supabase
-        .from('planos_de_treino')
-        .select('id, name, data_troca, exercicios')
-        .eq('user_id', alunoId)
-        .order('data_troca', { ascending: false });
+    .from('planos_de_treino')
+    .select('id, name, data_troca, exercicios')
+    .eq('user_id', alunoId)       // CONDIÇÃO 1: A ficha é deste aluno...
+    .eq('created_by', personalId) // CONDIÇÃO 2: ...E foi criada por este personal.
+    .order('data_troca', { ascending: false });
 
     if (error) {
         console.error('Erro ao buscar fichas existentes:', error);
@@ -242,7 +282,23 @@ async function gerarPDF() {
 // --- EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', async () => {
     await popularAlunosSelect();
-    exerciciosPorGrupo = await carregarExerciciosDoSite() || {};
+    // NO ARQUIVO: criar_ficha_script.js (dentro do DOMContentLoaded)
+
+// Versão corrigida
+try {
+    exerciciosPorGrupo = await carregarExerciciosDoSite();
+    if (!exerciciosPorGrupo) {
+        // Se o carregamento falhou, exerciciosPorGrupo será null.
+        // Atribuímos um objeto vazio e avisamos o usuário.
+        exerciciosPorGrupo = {};
+        alert('Aviso: A lista de exercícios online não pôde ser carregada. Você não conseguirá selecionar exercícios para a ficha. Verifique sua conexão ou tente mais tarde.');
+    }
+} catch (e) {
+    console.error("Erro crítico ao inicializar exercícios:", e);
+    exerciciosPorGrupo = {};
+    alert('Um erro crítico impediu o carregamento da lista de exercícios.');
+}
+
     
     document.getElementById('select-aluno').addEventListener('change', async (event) => {
         currentAlunoId = event.target.value;
