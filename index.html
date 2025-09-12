@@ -2,14 +2,181 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Carregando FitCraft...</title>
-    <script>
-        // Redireciona imediatamente para a página de login.
-        // A página de login então decidirá se o usuário deve ficar lá ou ir para o dashboard.
-        window.location.replace('./login.html');
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitCraft Personal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2c3e50">
+    
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        :root {
+            --preto-fundo: #000000;
+            --preto-card: #0a0a0a;
+            --borda-elementos: #2a2a2a;
+            --texto-principal: #e5e5e5;
+            --texto-secundario: #808080;
+            --cor-destaque: #00ff7f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--preto-fundo);
+            color: var(--texto-principal);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--cor-destaque);
+            margin-bottom: 2rem;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--borda-elementos);
+            border-radius: 50%;
+            border-top-color: var(--cor-destaque);
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--texto-secundario);
+            font-size: 1.1rem;
+        }
+
+        .error-message {
+            background-color: var(--preto-card);
+            border: 1px solid #ff1493;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            color: #ff1493;
+        }
+
+        .retry-button {
+            background-color: var(--cor-destaque);
+            color: var(--preto-fundo);
+            border: none;
+            border-radius: 8px;
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: opacity 0.3s;
+        }
+
+        .retry-button:hover {
+            opacity: 0.8;
+        }
+    </style>
 </head>
 <body>
-    <p>Redirecionando...</p>
+    <div class="loading-container">
+        <div class="logo">
+    <img src="fitcraft_personal_logo.png" alt="Minha Logo" style="height: 200px; width: auto;">
+    <!-- Ajuste o height/width conforme necessário para sua logo -->
+        </div>
+        
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Verificando autenticação...</div>
+        
+        <div id="errorContainer" style="display: none;">
+            <div class="error-message">
+                <strong>Erro ao verificar autenticação</strong>
+                <p id="errorMessage">Ocorreu um erro inesperado. Tente novamente.</p>
+                <button class="retry-button" onclick="checkAuth()">Tentar Novamente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="supabase-client.js"></script>
+    
+    <script>
+        // Aguardar o cliente Supabase estar disponível
+        function waitForSupabase() {
+            return new Promise((resolve) => {
+                if (window._supabase) {
+                    resolve();
+                } else {
+                    setTimeout(() => waitForSupabase().then(resolve), 100);
+                }
+            });
+        }
+
+        // Função principal de verificação de autenticação
+        async function checkAuth() {
+            try {
+                // Esconder mensagem de erro se estiver visível
+                document.getElementById('errorContainer').style.display = 'none';
+                
+                // Aguardar cliente Supabase
+                await waitForSupabase();
+                
+                console.log('Cliente Supabase carregado, verificando sessão...');
+                
+                // Verificar sessão atual
+                const { data: { session }, error } = await window._supabase.auth.getSession();
+                
+                if (error) {
+                    throw new Error(`Erro ao verificar sessão: ${error.message}`);
+                }
+                
+                if (session && session.user) {
+                    console.log('Usuário autenticado, redirecionando para dashboard...');
+                    // Usuário está logado, redirecionar para dashboard
+                    window.location.replace('dashboard.html');
+                } else {
+                    console.log('Usuário não autenticado, redirecionando para login...');
+                    // Usuário não está logado, redirecionar para login
+                    window.location.replace('login.html');
+                }
+                
+            } catch (error) {
+                console.error('Erro na verificação de autenticação:', error);
+                
+                // Mostrar mensagem de erro
+                document.getElementById('errorMessage').textContent = error.message;
+                document.getElementById('errorContainer').style.display = 'block';
+            }
+        }
+
+        // Iniciar verificação quando a página carregar
+        document.addEventListener('DOMContentLoaded', () => {
+            // Aguardar um pouco para garantir que tudo está carregado
+            setTimeout(checkAuth, 500);
+        });
+    </script>
 </body>
 </html>
+
