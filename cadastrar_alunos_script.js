@@ -143,40 +143,64 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- EVENT LISTENERS ---
 
-    if (btnSalvarAluno) {
-        btnSalvarAluno.addEventListener('click', async () => {
-            const nome = nomeAlunoInput.value.trim();
-            if (!nome) {
-                alert('Por favor, preencha o nome do aluno.');
-                return;
-            }
+   // Copie e cole este bloco inteiro no seu arquivo .js
 
-            btnSalvarAluno.disabled = true;
-            btnSalvarAluno.textContent = 'Salvando...';
+if (btnSalvarAluno) {
+    btnSalvarAluno.addEventListener('click', async () => {
+        
+        // --- INÍCIO DA VERSÃO CORRIGIDA ---
 
-            const novaCredencial = gerarCredencial();
-            const novoCliente = {
-                nome: nome,
-                data_inicio: dataCadastroInput.value || null,
-                valor_consultoria: valorConsultoriaInput.value || null,
-                credencial: novaCredencial
-            };
+        // 1. PRIMEIRO, pegamos o valor do input do nome.
+        const nome = nomeAlunoInput.value.trim();
 
-            const { data, error } = await _supabase.from('clients').insert([novoCliente]).select();
+        // 2. AGORA, validamos se o nome foi preenchido.
+        if (!nome) {
+            alert('Por favor, preencha o nome do aluno.');
+            return; // Para a execução se o nome estiver vazio.
+        }
 
-            btnSalvarAluno.disabled = false;
-            btnSalvarAluno.textContent = 'Salvar Aluno';
+        // 3. SÓ DEPOIS, buscamos o usuário logado.
+        const { data: { user }, error: userError } = await _supabase.auth.getUser();
 
-            if (error) {
-                console.error('Erro ao salvar cliente:', error);
-                alert(`Ocorreu um erro ao salvar. Detalhes: ${error.message}`);
-            } else {
-                limparFormulario();
-                renderizarAlunos();
-                mostrarModalCredencial(novaCredencial);
-            }
-        });
-    }
+        // 4. E verificamos se a sessão é válida.
+        if (userError || !user) {
+            alert('Sua sessão expirou ou é inválida. Por favor, faça login novamente.');
+            window.location.href = 'login.html'; 
+            return;
+        }
+        
+        // --- FIM DA VERSÃO CORRIGIDA ---
+
+        // O resto do seu código continua igual e perfeito!
+        btnSalvarAluno.disabled = true;
+        btnSalvarAluno.textContent = 'Salvando...';
+
+        const novaCredencial = gerarCredencial();
+        
+        const novoCliente = {
+            nome: nome, // Usa a variável 'nome' que já foi validada
+            data_inicio: dataCadastroInput.value || null,
+            valor_consultoria: valorConsultoriaInput.value || null,
+            credencial: novaCredencial,
+            personal_id: user.id // Usa a variável 'user' que já foi validada
+        };
+
+        const { data, error } = await _supabase.from('clients').insert([novoCliente]).select();
+
+        btnSalvarAluno.disabled = false;
+        btnSalvarAluno.textContent = 'Salvar Aluno';
+
+        if (error) {
+            console.error('Erro ao salvar cliente:', error);
+            alert(`Ocorreu um erro ao salvar. Detalhes: ${error.message}`);
+        } else {
+            limparFormulario();
+            renderizarAlunos();
+            mostrarModalCredencial(novaCredencial);
+        }
+    });
+}
+
 
     if (listaAlunosCadastrados) {
         listaAlunosCadastrados.addEventListener('click', (event) => {
