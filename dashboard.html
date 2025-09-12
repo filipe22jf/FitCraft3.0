@@ -1149,24 +1149,26 @@
             debugLog('=== FIM DA ATUALIZAÇÃO DO GRÁFICO ===');
         }
 
-        function atualizarRelogio() {
+        // SUBSTITUA SUA FUNÇÃO ANTIGA POR ESTA
+function atualizarRelogio() {
     // 1. A linha continua a mesma...
     const cardFichas = document.querySelector('#totalWorkouts').closest('.stat-card');
 
     // 2. ...MAS AGORA TEMOS UMA VERIFICAÇÃO DE SEGURANÇA!
-    if (!cardFichas) return; // <--- ESTA É A MUDANÇA NECESSÁRIA
+    if (!cardFichas) {
+        // Se o card não for encontrado, a função para silenciosamente aqui.
+        // Isso impede o erro 'TypeError' e permite que o resto do JS (como o logout) funcione.
+        return; 
+    }
 
     // 3. O resto do código só é executado SE `cardFichas` for encontrado.
     const agora = new Date();
-    
     const dia = String(agora.getDate()).padStart(2, '0');
-    const mes = String(agora.getMonth() + 1).padStart(2, '0'); // Meses são de 0 a 11
+    const mes = String(agora.getMonth() + 1).padStart(2, '0');
     const ano = agora.getFullYear();
-    
     const hora = String(agora.getHours()).padStart(2, '0');
     const minuto = String(agora.getMinutes()).padStart(2, '0');
 
-    // Monta o novo conteúdo do card
     cardFichas.innerHTML = `
         <div class="stat-icon" style="font-size: 1.5rem;">📅</div>
         <div class="stat-value" style="font-size: 1.7rem; color: var(--texto-principal);">${dia}/${mes}/${ano}</div>

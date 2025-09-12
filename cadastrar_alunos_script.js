@@ -143,12 +143,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- EVENT LISTENERS ---
 
-   // Copie e cole este bloco inteiro no seu arquivo .js
+    // NO ARQUIVO: cadastrar_alunos_script.js
+// SUBSTITUA O BLOCO 'if (btnSalvarAluno)' INTEIRO POR ESTE:
 
 if (btnSalvarAluno) {
     btnSalvarAluno.addEventListener('click', async () => {
         
-        // --- INÍCIO DA VERSÃO CORRIGIDA ---
+        // --- INÍCIO DA VERSÃO FINAL E CORRIGIDA ---
 
         // 1. PRIMEIRO, pegamos o valor do input do nome.
         const nome = nomeAlunoInput.value.trim();
@@ -169,20 +170,20 @@ if (btnSalvarAluno) {
             return;
         }
         
-        // --- FIM DA VERSÃO CORRIGIDA ---
+        // --- FIM DA VERSÃO FINAL E CORRIGIDA ---
 
-        // O resto do seu código continua igual e perfeito!
+        // O resto do seu código, que agora funciona perfeitamente.
         btnSalvarAluno.disabled = true;
         btnSalvarAluno.textContent = 'Salvando...';
 
         const novaCredencial = gerarCredencial();
         
         const novoCliente = {
-            nome: nome, // Usa a variável 'nome' que já foi validada
+            nome: nome,
             data_inicio: dataCadastroInput.value || null,
             valor_consultoria: valorConsultoriaInput.value || null,
             credencial: novaCredencial,
-            personal_id: user.id // Usa a variável 'user' que já foi validada
+            personal_id: user.id // Usando 'personal_id' como você confirmou
         };
 
         const { data, error } = await _supabase.from('clients').insert([novoCliente]).select();
@@ -197,6 +198,7 @@ if (btnSalvarAluno) {
             limparFormulario();
             renderizarAlunos();
             mostrarModalCredencial(novaCredencial);
+            alert('Aluno salvo com sucesso!'); // Adicionando um alerta de sucesso
         }
     });
 }
