@@ -921,7 +921,7 @@
                 for (const tabela of tabelasPossiveis) {
                     try {
                         const { count, error } = await _supabase
-                            .from(tabela)
+                            .from('planos_de_treino')
                             .select('*', { count: 'exact', head: true });
 
                         if (!error) {
@@ -1150,9 +1150,13 @@
         }
 
         function atualizarRelogio() {
+    // 1. A linha continua a mesma...
     const cardFichas = document.querySelector('#totalWorkouts').closest('.stat-card');
-    if (!cardFichas) return;
 
+    // 2. ...MAS AGORA TEMOS UMA VERIFICAÇÃO DE SEGURANÇA!
+    if (!cardFichas) return; // <--- ESTA É A MUDANÇA NECESSÁRIA
+
+    // 3. O resto do código só é executado SE `cardFichas` for encontrado.
     const agora = new Date();
     
     const dia = String(agora.getDate()).padStart(2, '0');
