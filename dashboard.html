@@ -1151,8 +1151,8 @@
 
         // SUBSTITUA SUA FUNÇÃO ANTIGA POR ESTA
 function atualizarRelogio() {
-    // 1. A linha continua a mesma...
-    const cardFichas = document.querySelector('#totalWorkouts').closest('.stat-card');
+    // 1. A linha de busca continua a mesma...
+    const cardFichas = document.querySelector('#totalWorkouts')?.closest('.stat-card');
 
     // 2. ...MAS AGORA TEMOS UMA VERIFICAÇÃO DE SEGURANÇA!
     if (!cardFichas) {
