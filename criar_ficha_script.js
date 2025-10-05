@@ -327,8 +327,35 @@ async function preencherFichaComDadosDaIA(plano) {
 function atualizarContadorExercicios() { document.querySelector(".counter").textContent = `${exerciciosAdicionados.length} exercício(s) adicionado(s)`; }
 
 // --- FUNÇÕES DE INTEGRAÇÃO COM SUPABASE ---
-async function popularAlunosSelect() { const selectAluno = document.getElementById('select-aluno'); selectAluno.innerHTML = '<option value="">Carregando...</option>'; const { data: clients, error } = await _supabase.from('clients').select('id, nome').not('credencial', 'is', null).order('nome', { ascending: true }); if (error) { console.error('Erro ao buscar alunos:', error); selectAluno.innerHTML = '<option value="">Erro ao carregar alunos</option>'; return; } selectAluno.innerHTML = '<option value="">Selecione um aluno</option>'; clients.forEach(client => { const option = document.createElement('option'); option.value = client.id; option.textContent = client.nome; selectAluno.appendChild(option); }); }
-
+async function popularAlunosSelect() { 
+    const selectAluno = document.getElementById('select-aluno'); 
+    selectAluno.innerHTML = '<option value="">Carregando...</option>'; 
+    
+    const { data: clients, error } = await _supabase
+        .from('clients')
+        .select('id, nome')
+        .not('credencial', 'is', null)  // ou use: .filter('credencial', 'neq', null)
+        .order('nome', { ascending: true }); 
+    
+    if (error) { 
+        console.error('Erro ao buscar alunos:', error); 
+        selectAluno.innerHTML = '<option value="">Erro ao carregar alunos</option>'; 
+        return; 
+    } 
+    
+    if (!clients || clients.length === 0) {
+        selectAluno.innerHTML = '<option value="">Nenhum aluno encontrado</option>';
+        return;
+    }
+    
+    selectAluno.innerHTML = '<option value="">Selecione um aluno</option>'; 
+    clients.forEach(client => { 
+        const option = document.createElement('option'); 
+        option.value = client.id; 
+        option.textContent = client.nome; 
+        selectAluno.appendChild(option); 
+    }); 
+}
 async function popularFichasExistentes(alunoId) {
     const listaFichasDiv = document.getElementById('lista-fichas-existentes');
     listaFichasDiv.innerHTML = '<div class="loading"></div>';
@@ -421,44 +448,51 @@ async function salvarFichaOnline() {
 // ADICIONE ESTA NOVA FUNÇÃO AO SEU SCRIPT
 
 async function deletarFicha(fichaId, fichaNome) {
-    // 1. Pede confirmação ao usuário para evitar exclusões acidentais.
+    // DEBUG: Verificar autenticação
+    const { data: { user } } = await _supabase.auth.getUser();
+    console.log('🔍 User ID logado:', user?.id);
+    console.log('🗑️ Tentando deletar ficha ID:', fichaId);
+    
     const confirmacao = confirm(`Você tem certeza que deseja deletar a ficha "${fichaNome}"? Esta ação não pode ser desfeita.`);
 
     if (!confirmacao) {
-        console.log("Exclusão cancelada pelo usuário.");
-        return; // Para a execução se o usuário cancelar.
+        console.log("❌ Exclusão cancelada pelo usuário.");
+        return;
     }
 
     const loading = document.getElementById("loading");
-    loading.style.display = 'block';
+    if (loading) loading.style.display = 'block';
 
     try {
-        // 2. Executa o comando de delete no Supabase.
-        const { error } = await _supabase
+        // Tenta deletar
+        const { data, error } = await _supabase
             .from('planos_de_treino')
             .delete()
-            .eq('id', fichaId);
+            .eq('id', fichaId)
+            .select(); // Adicione .select() para ver o que foi deletado
 
-        loading.style.display = 'none';
+        console.log('📊 Resultado do delete:', { data, error });
+
+        if (loading) loading.style.display = 'none';
 
         if (error) {
-            // Se der erro, mostra um alerta e loga no console.
-            console.error('Erro ao deletar a ficha:', error);
-            alert(`Ocorreu um erro ao deletar a ficha: ${error.message}`);
+            console.error('❌ Erro ao deletar:', error);
+            alert(`Erro ao deletar: ${error.message}`);
+        } else if (data && data.length === 0) {
+            console.warn('⚠️ Nenhuma linha foi deletada. Verifique a política RLS.');
+            alert('A ficha não pôde ser deletada. Verifique suas permissões.');
         } else {
-            // Se der certo, mostra um alerta de sucesso.
+            console.log('✅ Ficha deletada com sucesso!');
             alert(`Ficha "${fichaNome}" deletada com sucesso!`);
             
-            // 3. Atualiza a lista de fichas na tela.
-            //    A função 'popularFichasExistentes' já busca e redesenha a lista.
             if (currentAlunoId) {
-                popularFichasExistentes(currentAlunoId);
+                await popularFichasExistentes(currentAlunoId);
             }
         }
     } catch (err) {
-        loading.style.display = 'none';
-        console.error("Erro inesperado na função deletarFicha:", err);
-        alert("Um erro inesperado ocorreu.");
+        if (loading) loading.style.display = 'none';
+        console.error("💥 Erro inesperado:", err);
+        alert("Erro inesperado ao deletar.");
     }
 }
 
@@ -563,7 +597,18 @@ const btnGerarIA = document.getElementById('btn-gerar-com-ia');
         }
     });
 
-    document.addEventListener('click', (event) => {
+   document.addEventListener('click', (event) => {
+        // Botão de deletar
+        const deleteBtnClicado = event.target.closest('.delete-ficha-btn');
+        if (deleteBtnClicado) {
+            event.stopPropagation();
+            const fichaId = deleteBtnClicado.dataset.fichaId;
+            const fichaNome = deleteBtnClicado.dataset.fichaNome;
+            deletarFicha(fichaId, fichaNome);
+            return;
+        }
+
+        // Item da ficha
         const fichaItemClicado = event.target.closest('.ficha-item');
         if (fichaItemClicado) {
             document.querySelectorAll('.ficha-item').forEach(item => item.classList.remove('selected'));
@@ -572,22 +617,11 @@ const btnGerarIA = document.getElementById('btn-gerar-com-ia');
             document.getElementById('btn-editar-ficha').disabled = false;
             return;
         }
-        const deleteBtnClicado = event.target.closest('.delete-ficha-btn');
 
-    if (deleteBtnClicado) {
-        event.stopPropagation(); // Impede que o clique no botão selecione a ficha inteira.
-        const fichaId = deleteBtnClicado.dataset.fichaId;
-        const fichaNome = deleteBtnClicado.dataset.fichaNome;
-        deletarFicha(fichaId, fichaNome);
-        return; // Finaliza a execução para este clique.
-    }
+        // Outros botões
         if (event.target.closest('#btn-editar-ficha')) {
-            if (!event.target.closest('#btn-editar-ficha').disabled) {
-                if (fichaSelecionada) {
-                    iniciarEdicaoFicha(fichaSelecionada.id);
-                } else {
-                    alert('Por favor, selecione uma ficha para editar.');
-                }
+            if (!event.target.closest('#btn-editar-ficha').disabled && fichaSelecionada) {
+                iniciarEdicaoFicha(fichaSelecionada.id);
             }
         } else if (event.target.closest('#btn-nova-ficha')) {
             iniciarNovaFicha();
@@ -605,5 +639,6 @@ const btnGerarIA = document.getElementById('btn-gerar-com-ia');
             document.getElementById('btn-editar-ficha').disabled = true;
             limparDadosFicha();
         }
-    });
-});
+    }); // <- FECHA O addEventListener DE CLICK
+
+}); // <- FECHA O DOMContentLoaded
