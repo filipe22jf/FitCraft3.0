@@ -14,6 +14,36 @@ let modoAgrupamento = {
 };
 
 // --- FUNÇÕES DE LÓGICA ---
+
+function calcularSimilaridade(str1, str2) {
+    str1 = str1.toLowerCase();
+    str2 = str2.toLowerCase();
+    const track = Array(str2.length + 1).fill(null).map(() =>
+        Array(str1.length + 1).fill(null));
+    for (let i = 0; i <= str1.length; i += 1) {
+        track[0][i] = i;
+    }
+    for (let j = 0; j <= str2.length; j += 1) {
+        track[j][0] = j;
+    }
+    for (let j = 1; j <= str2.length; j += 1) {
+        for (let i = 1; i <= str1.length; i += 1) {
+            const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
+            track[j][i] = Math.min(
+                track[j][i - 1] + 1,
+                track[j - 1][i] + 1,
+                track[j - 1][i - 1] + indicator,
+            );
+        }
+    }
+    const distance = track[str2.length][str1.length];
+    const longerLength = Math.max(str1.length, str2.length);
+    if (longerLength === 0) {
+        return 1;
+    }
+    return (longerLength - distance) / longerLength;
+}
+
 function uniqueSorted(arr) { return Array.from(new Set(arr)).sort((a, b) => a.localeCompare(b, 'pt-BR')); }
 function classificarPernas(nome) { const n = nome.toLowerCase(); const quadKeys = ['extensor', 'extensora', 'agach', 'leg press', 'passada', 'afundo', 'bulgaro', 'búlgaro', 'frontal', 'hack']; const postKeys = ['flexor', 'flexora', 'stiff', 'levantamento terra', 'romeno', 'mesa flexora']; if (postKeys.some(k => n.includes(k))) return 'posteriores_de_coxa'; if (quadKeys.some(k => n.includes(k))) return 'quadriceps'; return 'quadriceps'; }
 function construirMapa(data) { const mapa = { peitoral: [], dorsais: [], ombros: [], biceps: [], triceps: [], quadriceps: [], posteriores_de_coxa: [], gluteos: [], panturrilhas: [], trapezio: [], eretores_da_espinha: [], cardio_academia: [], abdomen: [], antebracos: [] }; for (const item of data) { const cat = (item.category || '').toLowerCase(); const nome = item.name || ''; if (!nome) continue; if (cat.includes('peitoral')) mapa.peitoral.push(nome); else if (cat.includes('costas') || cat.includes('dorsais')) mapa.dorsais.push(nome); else if (cat.includes('ombros')) mapa.ombros.push(nome); else if (cat.includes('bíceps') || cat.includes('biceps')) mapa.biceps.push(nome); else if (cat.includes('tríceps') || cat.includes('triceps')) mapa.triceps.push(nome); else if (cat.includes('pernas')) mapa[classificarPernas(nome)].push(nome); else if (cat.includes('glúteos') || cat.includes('gluteos')) mapa.gluteos.push(nome); else if (cat.includes('panturr')) mapa.panturrilhas.push(nome); else if (cat.includes('trapézio') || cat.includes('trapezio')) mapa.trapezio.push(nome); else if (cat.includes('eretores')) mapa.eretores_da_espinha.push(nome); else if (cat.includes('cardio')) mapa.cardio_academia.push(nome); else if (cat.includes('abdômen') || cat.includes('abdomen')) mapa.abdomen.push(nome); else if (cat.includes('antebra')) mapa.antebracos.push(nome); } for (const k of Object.keys(mapa)) { mapa[k] = uniqueSorted(mapa[k]); } return mapa; }
@@ -217,7 +247,6 @@ function removerExercicioDoGrupo(grupoId) {
 async function preencherFichaComDadosDaIA(plano) {
     if (!plano || !plano.dias_treino || !Array.isArray(plano.dias_treino)) {
         alert('A IA retornou um formato de treino inválido. Tente novamente.');
-        console.error("Formato inválido da IA:", plano);
         return;
     }
 
@@ -229,7 +258,10 @@ async function preencherFichaComDadosDaIA(plano) {
 
     const nomeDaFicha = plano.nome_ficha || 'Treino Gerado por IA';
     document.getElementById('nome-ficha').value = nomeDaFicha;
-    // ... (resto do código para preencher a interface) ...
+    document.getElementById('dados-ficha-section').style.display = 'block';
+    document.getElementById('adicionar-exercicio-section').style.display = 'block';
+    document.getElementById('ficha-atual-section').style.display = 'block';
+    document.getElementById('modo-edicao').textContent = '(Gerado por IA)';
     document.getElementById('nome-ficha-atual').textContent = `- ${nomeDaFicha}`;
 
     plano.dias_treino.forEach(dia => {
@@ -237,45 +269,51 @@ async function preencherFichaComDadosDaIA(plano) {
             dia.exercicios.forEach(ex => {
                 const nomeExercicioIA = ex.exercicio || ex.nome;
                 if (!nomeExercicioIA || typeof nomeExercicioIA !== 'string') {
-                    console.warn("Exercício da IA ignorado por formato inválido:", ex);
                     return;
                 }
 
-                // Lógica de mapeamento reverso (A PARTE IMPORTANTE)
-                const exercicioEncontrado = bibliotecaExercicios.find(item => {
-                    if (!item || !item.name || typeof item.name !== 'string') return false;
-                    const nomeBibliotecaLimpo = item.name.toLowerCase();
-                    const nomeIALimpo = nomeExercicioIA.toLowerCase();
-                    return nomeBibliotecaLimpo.includes(nomeIALimpo) || nomeIALimpo.includes(nomeBibliotecaLimpo);
-                });
+                // --- INÍCIO DA LÓGICA DE SIMILARIDADE ---
+                let melhorCorrespondencia = null;
+                let maiorSimilaridade = 0;
+                const LIMITE_DE_SIMILARIDADE = 0.6; // Ajuste este valor (entre 0 e 1) se necessário
 
-                if (exercicioEncontrado) {
-                    const novoExercicio = {
-                        id: Date.now() + Math.random(),
-                        grupoMuscular: dia.grupo_muscular || 'Não especificado',
-                        exercicio: exercicioEncontrado.name, // Usa o nome correto
-                        series: parseInt(ex.series) || 3,
-                        repeticoes: ex.repeticoes || '10-12',
-                        tecnica: ex.tecnica_avancada || 'Nenhuma',
-                        grupoTecnicaId: null,
-                        gif_url: exercicioEncontrado.path // Usa o caminho do GIF correto
-                    };
-                    exerciciosAdicionados.push(novoExercicio);
-                } else {
-                    console.log(`[MAPEAMENTO FALHOU] Não foi possível encontrar um exercício correspondente para "${nomeExercicioIA}" na sua biblioteca.`);
-                    // Adiciona mesmo sem GIF para não perder o exercício
-                    const novoExercicio = {
-                        id: Date.now() + Math.random(),
-                        grupoMuscular: dia.grupo_muscular || 'Não especificado',
-                        exercicio: nomeExercicioIA,
-                        series: parseInt(ex.series) || 3,
-                        repeticoes: ex.repeticoes || '10-12',
-                        tecnica: ex.tecnica_avancada || 'Nenhuma',
-                        grupoTecnicaId: null,
-                        gif_url: null
-                    };
-                    exerciciosAdicionados.push(novoExercicio);
+                for (const item of bibliotecaExercicios) {
+                    if (item && item.name) {
+                        const similaridade = calcularSimilaridade(nomeExercicioIA, item.name);
+                        if (similaridade > maiorSimilaridade) {
+                            maiorSimilaridade = similaridade;
+                            melhorCorrespondencia = item;
+                        }
+                    }
                 }
+
+                let exercicioFinal;
+                let gifUrlFinal;
+
+                if (maiorSimilaridade >= LIMITE_DE_SIMILARIDADE) {
+                    exercicioFinal = melhorCorrespondencia.name;
+                    gifUrlFinal = melhorCorrespondencia.path;
+                    if (maiorSimilaridade < 1) { // Loga se a correspondência não for perfeita
+                        console.log(`[MAPEAMENTO INTELIGENTE] Nome da IA: "${nomeExercicioIA}" -> Mapeado para: "${exercicioFinal}" (Similaridade: ${maiorSimilaridade.toFixed(2)})`);
+                    }
+                } else {
+                    exercicioFinal = nomeExercicioIA;
+                    gifUrlFinal = null;
+                    console.log(`[MAPEAMENTO FALHOU] Nenhuma correspondência similar encontrada para "${nomeExercicioIA}".`);
+                }
+                
+                const novoExercicio = {
+                    id: Date.now() + Math.random(),
+                    grupoMuscular: dia.grupo_muscular || 'Não especificado',
+                    exercicio: exercicioFinal,
+                    series: parseInt(ex.series) || 3,
+                    repeticoes: ex.repeticoes || '10-12',
+                    tecnica: ex.tecnica_avancada || 'Nenhuma',
+                    grupoTecnicaId: null,
+                    gif_url: gifUrlFinal
+                };
+                exerciciosAdicionados.push(novoExercicio);
+                // --- FIM DA LÓGICA DE SIMILARIDADE ---
             });
         }
     });
