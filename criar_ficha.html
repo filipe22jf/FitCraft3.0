@@ -53,6 +53,27 @@
                 </div>
             </div>
 
+      <!-- Card do Assistente de IA -->
+        <div class="form-card" id="assistente-ia-section">
+            <h3>
+                <span>🤖</span>
+                Assistente de IA para Treinos
+            </h3>
+            <div class="form-group">
+                 <label for="ia-prompt" class="form-label">
+                 Descreva o treino que você deseja criar:
+                 </label>
+                <textarea id="ia-prompt" class="form-input" rows="4" placeholder="Ex: Crie um treino ABC para um aluno intermediário com foco em hipertrofia. O treino A é peito e tríceps, B é costas e bíceps, e C é pernas e ombros."></textarea>
+        </div>
+                <button class="add-exercise-btn" id="btn-gerar-com-ia" type="button" style="background: linear-gradient(45deg, var(--cor-destaque), var(--cor-link));">
+        ✨       Gerar Treino com IA
+            </button>
+            <div id="ia-loading" style="display: none; text-align: center; margin-top: 1rem;">
+            <div class="spinner"></div>
+            <p>Analisando seu pedido e montando o treino... Isso pode levar alguns segundos.</p>
+            </div>
+        </div>
+
             <!-- Card de Dados da Ficha -->
             <div class="form-card" id="dados-ficha-section" style="display: none;">
                 <h3>

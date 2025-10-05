@@ -51,6 +51,62 @@ async function carregarExerciciosDoSite() {
     }
 }
 
+const OPENAI_API_KEY = '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';
+
+/**
+ * Gera um plano de treino usando a API da OpenAI.
+ * @param {string} promptDoPersonal - A instrução do personal trainer.
+ * @returns {Promise<object|null>} - O plano de treino em formato JSON ou null em caso de erro.
+ */
+async function gerarTreinoComIA(promptDoPersonal) {
+    const urlExercicios = 'https://exercicios-mauve.vercel.app/gif_index.json';
+    const loadingDiv = document.getElementById('ia-loading' );
+    
+    if (loadingDiv) loadingDiv.style.display = 'block';
+
+    try {
+        const responseExercicios = await fetch(urlExercicios);
+        if (!responseExercicios.ok) throw new Error('Falha ao buscar a lista de exercícios.');
+        
+        const listaDeExerciciosCompleta = await responseExercicios.json();
+        const listaFormatada = listaDeExerciciosCompleta.map(ex => `${ex.nome_exercicio} (Grupo: ${ex.grupo_muscular})`).join('\n');
+
+        const promptDeSistema = `Você é um personal trainer de elite. Sua tarefa é criar um plano de treino em JSON baseado nas instruções do usuário, usando APENAS os exercícios da lista abaixo. Sua resposta deve ser APENAS o código JSON, sem nenhum texto ou comentário adicional. A estrutura do JSON deve ser: { "nome_ficha": "Nome do Treino", "dias_treino": [ { "dia": "A", "grupo_muscular": "Peito e Tríceps", "exercicios": [ { "nome": "Supino Reto", "series": "4", "repeticoes": "8-12", "tecnica_avancada": "Nenhuma" } ] } ] }. LISTA DE EXERCÍCIOS DISPONÍVEIS:\n${listaFormatada}`;
+        const promptDoUsuario = `Com base nas regras e na lista de exercícios, crie o seguinte treino: ${promptDoPersonal}`;
+
+        const responseApi = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${OPENAI_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: 'gpt-4o',
+                messages: [{ role: 'system', content: promptDeSistema }, { role: 'user', content: promptDoUsuario }],
+                response_format: { "type": "json_object" }
+            } )
+        });
+
+        if (!responseApi.ok) {
+            const errorBody = await responseApi.json();
+            throw new Error(`Falha na API da OpenAI: ${errorBody.error.message}`);
+        }
+
+        const data = await responseApi.json();
+        const planoDeTreino = JSON.parse(data.choices[0].message.content);
+        
+        if (loadingDiv) loadingDiv.style.display = 'none';
+        return planoDeTreino;
+
+    } catch (error) {
+        console.error('ERRO GERAL ao gerar treino com IA:', error);
+        alert(`Ocorreu um erro ao gerar o treino: ${error.message}`);
+        if (loadingDiv) loadingDiv.style.display = 'none';
+        return null;
+    }
+}
+
+
 const tecnicasDescricoes = { "Drop set": "Realizar o exercício até a falha e reduzir o peso para continuar até a falha novamente.", "Rest-pause": "Ir até a falha, descansar 10–20s e continuar com o mesmo peso.", "Bi-set": "Dois exercícios em sequência sem descanso.", "Tri-set": "Três exercícios em sequência sem descanso.", "Giant set": "Quatro ou mais exercícios em sequência sem descanso.", "Super-set": "Dois exercícios de grupos opostos sem descanso.", "Pré-exaustão": "Exercício isolado antes do composto para o mesmo músculo.", "Pós-exaustão": "Exercício isolado após o composto para o mesmo músculo.", "Isometria": "Manter a contração por tempo definido.", "Parciais": "Repetições com amplitude reduzida na parte mais difícil.", "Forçada": "Ajuda do parceiro nas últimas repetições.", "Negativa": "Ênfase na fase excêntrica, descendo de forma lenta.", "Cluster set": "Dividir a série em mini-blocos com pequenos descansos.", "Piramidal crescente": "Aumenta peso e reduz repetições a cada série.", "Piramidal decrescente": "Reduz peso e aumenta repetições a cada série.", "FST-7": "7 séries de 10–15 repetições com 30–45s de descanso, geralmente no final." };
 function formatGrupoForPDF(grupo) { const g = (grupo || '').toLowerCase(); if (g.includes('dorsais') || g.includes('costas')) { return '(costas)'; } else if (g.includes('ombros (deltoides)')) { return '(deltoides)'; } return `(${g.replace(/[^a-z\s]/gi, '')})`; }
 
@@ -158,6 +214,50 @@ function removerExercicioDoGrupo(grupoId) {
     atualizarListaExercicios();
     atualizarContadorExercicios();
     if (exerciciosAdicionados.length === 0) { document.getElementById("pdf-section").style.display = "none"; }
+}
+
+function preencherFichaComDadosDaIA(plano) {
+    if (!plano || !plano.dias_treino || !Array.isArray(plano.dias_treino)) {
+        alert('A IA retornou um formato de treino inválido. Por favor, tente novamente.');
+        console.error("Formato inválido recebido da IA:", plano);
+        return;
+    }
+
+    // 1. Limpa a ficha atual para receber os novos dados
+    limparDadosFicha();
+
+    // 2. Preenche os dados principais da ficha
+    document.getElementById('nome-ficha').value = plano.nome_ficha || 'Treino Gerado por IA';
+    document.getElementById('dados-ficha-section').style.display = 'block';
+    document.getElementById('adicionar-exercicio-section').style.display = 'block';
+    document.getElementById('ficha-atual-section').style.display = 'block';
+    document.getElementById('modo-edicao').textContent = '(Gerado por IA)';
+    document.getElementById('nome-ficha-atual').textContent = `- ${plano.nome_ficha || 'Treino Gerado por IA'}`;
+
+    // 3. Itera sobre os dias e exercícios e os adiciona na lista de exercícios
+    plano.dias_treino.forEach(dia => {
+        if (dia.exercicios && Array.isArray(dia.exercicios)) {
+            dia.exercicios.forEach(ex => {
+                const novoExercicio = {
+                    id: Date.now() + Math.random(), // ID único para evitar conflitos
+                    grupoMuscular: dia.grupo_muscular || 'Não especificado',
+                    exercicio: ex.nome,
+                    series: parseInt(ex.series) || 3,
+                    repeticoes: ex.repeticoes || '10-12',
+                    tecnica: ex.tecnica_avancada || 'Nenhuma',
+                    grupoTecnicaId: null
+                };
+                exerciciosAdicionados.push(novoExercicio);
+            });
+        }
+    });
+
+    // 4. Atualiza a interface para mostrar os exercícios adicionados
+    atualizarListaExercicios();
+    atualizarContadorExercicios();
+    document.getElementById("pdf-section").style.display = "block";
+    
+    alert('Ficha de treino preenchida com sucesso pela IA!');
 }
 
 function atualizarContadorExercicios() { document.querySelector(".counter").textContent = `${exerciciosAdicionados.length} exercício(s) adicionado(s)`; }
@@ -299,7 +399,29 @@ try {
     alert('Um erro crítico impediu o carregamento da lista de exercícios.');
 }
 
-    
+const btnGerarIA = document.getElementById('btn-gerar-com-ia');
+    if (btnGerarIA) {
+        btnGerarIA.addEventListener('click', async () => {
+            const promptDoPersonal = document.getElementById('ia-prompt').value;
+            if (!promptDoPersonal.trim()) {
+                alert('Por favor, descreva o treino que você deseja criar.');
+                return;
+            }
+            if (!currentAlunoId) {
+                alert('Por favor, selecione um aluno antes de gerar um treino.');
+                return;
+            }
+
+            // Chama a função da IA
+            const planoDeTreino = await gerarTreinoComIA(promptDoPersonal);
+
+            // Se a IA retornou um plano válido, vamos processá-lo
+           if (planoDeTreino) {
+    preencherFichaComDadosDaIA(planoDeTreino);
+}
+        });
+    }
+
     document.getElementById('select-aluno').addEventListener('change', async (event) => {
         currentAlunoId = event.target.value;
         limparDadosFicha();
