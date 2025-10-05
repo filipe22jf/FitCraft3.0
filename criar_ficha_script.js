@@ -236,14 +236,15 @@ function preencherFichaComDadosDaIA(plano) {
             dia.exercicios.forEach(ex => {
                 // Cria um objeto de exercício para cada um encontrado no JSON
                 const novoExercicio = {
-                    id: Date.now() + Math.random(), // ID único para evitar conflitos
-                    grupoMuscular: dia.grupo_muscular || 'Não especificado',
-                    exercicio: ex.nome,
-                    series: parseInt(ex.series) || 3,
-                    repeticoes: ex.repeticoes || '10-12',
-                    tecnica: ex.tecnica_avancada || 'Nenhuma',
-                    grupoTecnicaId: null
-                };
+    id: Date.now() + Math.random(),
+    grupoMuscular: dia.grupo_muscular || 'Não especificado',
+    exercicio: ex.exercicio || ex.nome, // <--- A MÁGICA ESTÁ AQUI!
+    series: parseInt(ex.series) || 3,
+    repeticoes: ex.repeticoes || '10-12',
+    tecnica: ex.tecnica_avancada || 'Nenhuma',
+    grupoTecnicaId: null
+};
+
                 // Adiciona o exercício à nossa lista global
                 exerciciosAdicionados.push(novoExercicio);
             });
