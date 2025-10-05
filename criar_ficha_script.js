@@ -51,49 +51,41 @@ async function carregarExerciciosDoSite() {
     }
 }
 
-const OPENAI_API_KEY = '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';
-
 /**
  * Gera um plano de treino usando a API da OpenAI.
  * @param {string} promptDoPersonal - A instrução do personal trainer.
  * @returns {Promise<object|null>} - O plano de treino em formato JSON ou null em caso de erro.
  */
+// Arquivo: criar_ficha_script.js
+
 async function gerarTreinoComIA(promptDoPersonal) {
     const urlExercicios = 'https://exercicios-mauve.vercel.app/gif_index.json';
     const loadingDiv = document.getElementById('ia-loading' );
-    
     if (loadingDiv) loadingDiv.style.display = 'block';
 
     try {
+        // Busca a lista de exercícios como antes
         const responseExercicios = await fetch(urlExercicios);
         if (!responseExercicios.ok) throw new Error('Falha ao buscar a lista de exercícios.');
-        
         const listaDeExerciciosCompleta = await responseExercicios.json();
         const listaFormatada = listaDeExerciciosCompleta.map(ex => `${ex.nome_exercicio} (Grupo: ${ex.grupo_muscular})`).join('\n');
 
-        const promptDeSistema = `Você é um personal trainer de elite. Sua tarefa é criar um plano de treino em JSON baseado nas instruções do usuário, usando APENAS os exercícios da lista abaixo. Sua resposta deve ser APENAS o código JSON, sem nenhum texto ou comentário adicional. A estrutura do JSON deve ser: { "nome_ficha": "Nome do Treino", "dias_treino": [ { "dia": "A", "grupo_muscular": "Peito e Tríceps", "exercicios": [ { "nome": "Supino Reto", "series": "4", "repeticoes": "8-12", "tecnica_avancada": "Nenhuma" } ] } ] }. LISTA DE EXERCÍCIOS DISPONÍVEIS:\n${listaFormatada}`;
-        const promptDoUsuario = `Com base nas regras e na lista de exercícios, crie o seguinte treino: ${promptDoPersonal}`;
-
-        const responseApi = await fetch('https://api.openai.com/v1/chat/completions', {
+        // CHAMA A NOSSA PRÓPRIA API SEGURA!
+        const response = await fetch('/api/gerar-treino', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${OPENAI_API_KEY}`
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: 'gpt-4o',
-                messages: [{ role: 'system', content: promptDeSistema }, { role: 'user', content: promptDoUsuario }],
-                response_format: { "type": "json_object" }
-            } )
+                promptDoPersonal: promptDoPersonal,
+                listaFormatada: listaFormatada
+            })
         });
 
-        if (!responseApi.ok) {
-            const errorBody = await responseApi.json();
-            throw new Error(`Falha na API da OpenAI: ${errorBody.error.message}`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Falha na API: ${errorData.error.message || 'Erro desconhecido'}`);
         }
 
-        const data = await responseApi.json();
-        const planoDeTreino = JSON.parse(data.choices[0].message.content);
+        const planoDeTreino = await response.json();
         
         if (loadingDiv) loadingDiv.style.display = 'none';
         return planoDeTreino;
@@ -105,6 +97,7 @@ async function gerarTreinoComIA(promptDoPersonal) {
         return null;
     }
 }
+
 
 
 const tecnicasDescricoes = { "Drop set": "Realizar o exercício até a falha e reduzir o peso para continuar até a falha novamente.", "Rest-pause": "Ir até a falha, descansar 10–20s e continuar com o mesmo peso.", "Bi-set": "Dois exercícios em sequência sem descanso.", "Tri-set": "Três exercícios em sequência sem descanso.", "Giant set": "Quatro ou mais exercícios em sequência sem descanso.", "Super-set": "Dois exercícios de grupos opostos sem descanso.", "Pré-exaustão": "Exercício isolado antes do composto para o mesmo músculo.", "Pós-exaustão": "Exercício isolado após o composto para o mesmo músculo.", "Isometria": "Manter a contração por tempo definido.", "Parciais": "Repetições com amplitude reduzida na parte mais difícil.", "Forçada": "Ajuda do parceiro nas últimas repetições.", "Negativa": "Ênfase na fase excêntrica, descendo de forma lenta.", "Cluster set": "Dividir a série em mini-blocos com pequenos descansos.", "Piramidal crescente": "Aumenta peso e reduz repetições a cada série.", "Piramidal decrescente": "Reduz peso e aumenta repetições a cada série.", "FST-7": "7 séries de 10–15 repetições com 30–45s de descanso, geralmente no final." };
