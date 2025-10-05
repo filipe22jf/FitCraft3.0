@@ -61,51 +61,23 @@ async function carregarExerciciosDoSite() {
 // SUBSTITUA A FUNÇÃO ANTIGA POR ESTA VERSÃO MELHORADA
 
 async function gerarTreinoComIA(promptDoPersonal) {
-    const urlExercicios = 'https://exercicios-mauve.vercel.app/gif_index.json';
-    const loadingDiv = document.getElementById('ia-loading' );
+    const loadingDiv = document.getElementById('ia-loading');
     if (loadingDiv) loadingDiv.style.display = 'block';
 
     try {
-        // 1. Carrega a lista completa de exercícios que você já tem.
-        const responseExercicios = await fetch(urlExercicios);
-        if (!responseExercicios.ok) throw new Error('Falha ao buscar a lista de exercícios para a IA.');
-        const listaDeExerciciosCompleta = await responseExercicios.json();
-
-        // 2. Extrai APENAS os nomes dos exercícios para criar uma lista limpa.
-        //    Isso garante que a IA só veja os nomes exatos que existem na sua base.
-        const nomesDosExerciciosDisponiveis = listaDeExerciciosCompleta
-            .map(ex => ex.name) // Usando 'name' como está no seu exercicios.js
-            .filter(nome => nome); // Remove quaisquer nomes nulos ou vazios
-
-        // 3. MONTAGEM DO NOVO PROMPT (A PARTE MAIS IMPORTANTE)
-        //    Instruímos a IA de forma explícita a usar SOMENTE os nomes da lista.
-        const promptFinalParaIA = `
-            Você é um assistente especialista em criação de treinos de musculação.
-            Sua tarefa é criar um plano de treino com base na solicitação do personal trainer.
-
-            **REGRA MAIS IMPORTANTE:** Você DEVE OBRIGATORIAMENTE usar os nomes dos exercícios exatamente como eles aparecem na "LISTA DE EXERCÍCIOS DISPONÍVEIS" abaixo. Não invente, não abrevie e não modifique os nomes. Se um exercício pedido não estiver na lista, escolha o substituto mais próximo que ESTEJA na lista.
-
-            **SOLICITAÇÃO DO PERSONAL:** "${promptDoPersonal}"
-
-            **LISTA DE EXERCÍCIOS DISPONÍVEIS:**
-            ${nomesDosExerciciosDisponiveis.join('\n')}
-
-            Responda APENAS com o JSON do plano de treino, seguindo a estrutura de "dias_treino", "exercicios", etc.
-        `;
-
-        // 4. Envia o novo prompt super detalhado para a sua API.
+        // Envia apenas o prompt do personal, mantendo a requisição pequena.
         const response = await fetch('/api/gerar-treino', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                // O prompt agora é o 'promptFinalParaIA', não mais o 'promptDoPersonal' direto.
-                promptDoPersonal: promptFinalParaIA 
+                promptDoPersonal: promptDoPersonal 
             })
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(`Falha na API: ${errorData.error.message || 'Erro desconhecido'}`);
+            // Tenta ler a mensagem de erro da API, se houver.
+            const errorData = await response.json().catch(() => ({ error: { message: 'Erro desconhecido' } }));
+            throw new Error(`Falha na API: ${errorData.error.message}`);
         }
 
         const planoDeTreino = await response.json();
@@ -247,10 +219,7 @@ async function preencherFichaComDadosDaIA(plano) {
 
     const nomeDaFicha = plano.nome_ficha || 'Treino Gerado por IA';
     document.getElementById('nome-ficha').value = nomeDaFicha;
-    document.getElementById('dados-ficha-section').style.display = 'block';
-    document.getElementById('adicionar-exercicio-section').style.display = 'block';
-    document.getElementById('ficha-atual-section').style.display = 'block';
-    document.getElementById('modo-edicao').textContent = '(Gerado por IA)';
+    // ... (resto do código para preencher a interface) ...
     document.getElementById('nome-ficha-atual').textContent = `- ${nomeDaFicha}`;
 
     plano.dias_treino.forEach(dia => {
@@ -262,9 +231,7 @@ async function preencherFichaComDadosDaIA(plano) {
                     return;
                 }
 
-                // --- INÍCIO DA LÓGICA DE MAPEAMENTO REVERSO ---
-                
-                // 1. Busca o exercício na biblioteca usando a busca flexível que já tínhamos.
+                // Lógica de mapeamento reverso (A PARTE IMPORTANTE)
                 const exercicioEncontrado = bibliotecaExercicios.find(item => {
                     if (!item || !item.name || typeof item.name !== 'string') return false;
                     const nomeBibliotecaLimpo = item.name.toLowerCase();
@@ -272,23 +239,21 @@ async function preencherFichaComDadosDaIA(plano) {
                     return nomeBibliotecaLimpo.includes(nomeIALimpo) || nomeIALimpo.includes(nomeBibliotecaLimpo);
                 });
 
-                // 2. Se encontrou um exercício correspondente...
                 if (exercicioEncontrado) {
-                    // ...cria o novo exercício usando o NOME CORRETO e a GIF_URL da SUA biblioteca.
                     const novoExercicio = {
                         id: Date.now() + Math.random(),
                         grupoMuscular: dia.grupo_muscular || 'Não especificado',
-                        exercicio: exercicioEncontrado.name, // <-- USA O NOME CORRETO!
+                        exercicio: exercicioEncontrado.name, // Usa o nome correto
                         series: parseInt(ex.series) || 3,
                         repeticoes: ex.repeticoes || '10-12',
                         tecnica: ex.tecnica_avancada || 'Nenhuma',
                         grupoTecnicaId: null,
-                        gif_url: exercicioEncontrado.path // <-- USA O CAMINHO CORRETO!
+                        gif_url: exercicioEncontrado.path // Usa o caminho do GIF correto
                     };
                     exerciciosAdicionados.push(novoExercicio);
                 } else {
-                    // 3. Se mesmo a busca flexível falhou, adiciona o exercício sem GIF e loga o erro.
                     console.log(`[MAPEAMENTO FALHOU] Não foi possível encontrar um exercício correspondente para "${nomeExercicioIA}" na sua biblioteca.`);
+                    // Adiciona mesmo sem GIF para não perder o exercício
                     const novoExercicio = {
                         id: Date.now() + Math.random(),
                         grupoMuscular: dia.grupo_muscular || 'Não especificado',
@@ -297,11 +262,10 @@ async function preencherFichaComDadosDaIA(plano) {
                         repeticoes: ex.repeticoes || '10-12',
                         tecnica: ex.tecnica_avancada || 'Nenhuma',
                         grupoTecnicaId: null,
-                        gif_url: null // Sem GIF
+                        gif_url: null
                     };
                     exerciciosAdicionados.push(novoExercicio);
                 }
-                // --- FIM DA LÓGICA DE MAPEAMENTO REVERSO ---
             });
         }
     });
