@@ -233,24 +233,18 @@ function removerExercicioDoGrupo(grupoId) {
 }
 
 async function preencherFichaComDadosDaIA(plano) {
-    // Validação robusta para garantir que o plano e a estrutura estão corretos
     if (!plano || !plano.dias_treino || !Array.isArray(plano.dias_treino)) {
-        alert('A IA retornou um formato de treino inválido. Por favor, tente novamente.');
-        console.error("Formato inválido recebido da IA:", plano);
+        alert('A IA retornou um formato de treino inválido. Tente novamente.');
+        console.error("Formato inválido da IA:", plano);
         return;
     }
 
-    // --- INÍCIO DA MELHORIA ---
-    // 1. Carrega a biblioteca de exercícios completa para termos acesso aos GIFs
     const urlExercicios = 'https://exercicios-mauve.vercel.app/gif_index.json';
     const response = await fetch(urlExercicios );
     const bibliotecaExercicios = await response.json();
-    // --- FIM DA MELHORIA ---
 
-    // Limpa a ficha atual para receber os novos dados
     limparDadosFicha();
 
-    // Preenche os dados principais da ficha
     const nomeDaFicha = plano.nome_ficha || 'Treino Gerado por IA';
     document.getElementById('nome-ficha').value = nomeDaFicha;
     document.getElementById('dados-ficha-section').style.display = 'block';
@@ -259,69 +253,62 @@ async function preencherFichaComDadosDaIA(plano) {
     document.getElementById('modo-edicao').textContent = '(Gerado por IA)';
     document.getElementById('nome-ficha-atual').textContent = `- ${nomeDaFicha}`;
 
-    // Itera sobre os dias e exercícios
     plano.dias_treino.forEach(dia => {
-    if (dia.exercicios && Array.isArray(dia.exercicios)) {
-        dia.exercicios.forEach(ex => {
-            // --- INÍCIO DA CORREÇÃO ---
-            // Validação de segurança: Pula o exercício se ele for inválido ou não tiver um nome.
-            const nomeExercicioIA = ex.exercicio || ex.nome;
-            if (!nomeExercicioIA || typeof nomeExercicioIA !== 'string') {
-                console.warn("Exercício da IA ignorado por formato inválido:", ex);
-                return; // Pula para o próximo exercício do loop
-            }
-            // --- FIM DA CORREÇÃO ---
+        if (dia.exercicios && Array.isArray(dia.exercicios)) {
+            dia.exercicios.forEach(ex => {
+                const nomeExercicioIA = ex.exercicio || ex.nome;
+                if (!nomeExercicioIA || typeof nomeExercicioIA !== 'string') {
+                    console.warn("Exercício da IA ignorado por formato inválido:", ex);
+                    return;
+                }
 
-            // Agora podemos usar 'nomeExercicioIA' com segurança
-           // TRECHO FINAL (Busca Bidirecional + Log de Depuração)
+                // --- INÍCIO DA LÓGICA DE MAPEAMENTO REVERSO ---
+                
+                // 1. Busca o exercício na biblioteca usando a busca flexível que já tínhamos.
+                const exercicioEncontrado = bibliotecaExercicios.find(item => {
+                    if (!item || !item.name || typeof item.name !== 'string') return false;
+                    const nomeBibliotecaLimpo = item.name.toLowerCase();
+                    const nomeIALimpo = nomeExercicioIA.toLowerCase();
+                    return nomeBibliotecaLimpo.includes(nomeIALimpo) || nomeIALimpo.includes(nomeBibliotecaLimpo);
+                });
 
-let exercicioDaBiblioteca = null; // Inicializa como nulo
+                // 2. Se encontrou um exercício correspondente...
+                if (exercicioEncontrado) {
+                    // ...cria o novo exercício usando o NOME CORRETO e a GIF_URL da SUA biblioteca.
+                    const novoExercicio = {
+                        id: Date.now() + Math.random(),
+                        grupoMuscular: dia.grupo_muscular || 'Não especificado',
+                        exercicio: exercicioEncontrado.name, // <-- USA O NOME CORRETO!
+                        series: parseInt(ex.series) || 3,
+                        repeticoes: ex.repeticoes || '10-12',
+                        tecnica: ex.tecnica_avancada || 'Nenhuma',
+                        grupoTecnicaId: null,
+                        gif_url: exercicioEncontrado.path // <-- USA O CAMINHO CORRETO!
+                    };
+                    exerciciosAdicionados.push(novoExercicio);
+                } else {
+                    // 3. Se mesmo a busca flexível falhou, adiciona o exercício sem GIF e loga o erro.
+                    console.log(`[MAPEAMENTO FALHOU] Não foi possível encontrar um exercício correspondente para "${nomeExercicioIA}" na sua biblioteca.`);
+                    const novoExercicio = {
+                        id: Date.now() + Math.random(),
+                        grupoMuscular: dia.grupo_muscular || 'Não especificado',
+                        exercicio: nomeExercicioIA,
+                        series: parseInt(ex.series) || 3,
+                        repeticoes: ex.repeticoes || '10-12',
+                        tecnica: ex.tecnica_avancada || 'Nenhuma',
+                        grupoTecnicaId: null,
+                        gif_url: null // Sem GIF
+                    };
+                    exerciciosAdicionados.push(novoExercicio);
+                }
+                // --- FIM DA LÓGICA DE MAPEAMENTO REVERSO ---
+            });
+        }
+    });
 
-// Normaliza o nome da IA uma vez para reutilizar
-const nomeIALimpo = nomeExercicioIA.toLowerCase();
-
-exercicioDaBiblioteca = bibliotecaExercicios.find(item => {
-    // Garante que o item da biblioteca é válido
-    if (!item || !item.nome_exercicio || typeof item.nome_exercicio !== 'string') {
-        return false;
-    }
-    const nomeBibliotecaLimpo = item.nome_exercicio.toLowerCase();
-
-    // LÓGICA DE BUSCA BIDIRECIONAL:
-    // 1. O nome da biblioteca contém o nome da IA? (Ex: "Agachamento Livre" contém "Agachamento")
-    // 2. OU o nome da IA contém o nome da biblioteca? (Ex: "Agachamento" contém "Agachamento Livre")
-    return nomeBibliotecaLimpo.includes(nomeIALimpo) || nomeIALimpo.includes(nomeBibliotecaLimpo);
-});
-
-// --- LOG DE DEPURAÇÃO ---
-// Se, mesmo após a busca, não encontrarmos um GIF, vamos registrar o porquê.
-if (!exercicioDaBiblioteca) {
-    console.log(`[DEBUG] GIF não encontrado para: "${nomeExercicioIA}". Nenhum nome correspondente na biblioteca.`);
-}
-// --- FIM DO LOG ---
-
-
-            const novoExercicio = {
-                id: Date.now() + Math.random(),
-                grupoMuscular: dia.grupo_muscular || 'Não especificado',
-                exercicio: nomeExercicioIA, // Usa a variável segura
-                series: parseInt(ex.series) || 3,
-                repeticoes: ex.repeticoes || '10-12',
-                tecnica: ex.tecnica_avancada || 'Nenhuma',
-                grupoTecnicaId: null,
-                gif_url: exercicioDaBiblioteca ? exercicioDaBiblioteca.gif_url : null
-            };
-            
-            exerciciosAdicionados.push(novoExercicio);
-        });
-    }
-});
-
-    // Atualiza a interface para mostrar os exercícios adicionados
     atualizarListaExercicios();
     atualizarContadorExercicios();
     document.getElementById("pdf-section").style.display = "block";
-    
     alert('Ficha de treino completa preenchida com sucesso pela IA!');
 }
 
