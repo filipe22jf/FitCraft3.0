@@ -384,6 +384,12 @@ body {
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     border-left: 4px solid var(--borda-elementos);
+    
+    /* PROPRIEDADES ADICIONADAS AQUI */
+    position: relative; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .ficha-item:hover {

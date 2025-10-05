@@ -375,11 +375,14 @@ async function popularFichasExistentes(alunoId) {
         const numExercicios = plan.exercicios ? plan.exercicios.length : 0;
 
         fichaItem.innerHTML = `
-            <div class="ficha-info">
-                <h4>${plan.name}</h4>
-                <p>Data: ${dataFormatada} | ${numExercicios} exercício(s)</p>
-            </div>
-        `;
+    <div class="ficha-info">
+        <h4>${plan.name}</h4>
+        <p>Data: ${dataFormatada} | ${numExercicios} exercício(s)</p>
+    </div>
+    <button class="delete-ficha-btn" data-ficha-id="${plan.id}" data-ficha-nome="${plan.name}" title="Deletar esta ficha">
+        🗑️
+    </button>
+`;
         fichasContainer.appendChild(fichaItem);
     });
 
@@ -412,6 +415,50 @@ async function salvarFichaOnline() {
         popularFichasExistentes(currentAlunoId);
         document.getElementById('modo-edicao').textContent = '(Editando)';
         document.getElementById('nome-ficha-atual').textContent = `- ${fichaData.name}`;
+    }
+}
+
+// ADICIONE ESTA NOVA FUNÇÃO AO SEU SCRIPT
+
+async function deletarFicha(fichaId, fichaNome) {
+    // 1. Pede confirmação ao usuário para evitar exclusões acidentais.
+    const confirmacao = confirm(`Você tem certeza que deseja deletar a ficha "${fichaNome}"? Esta ação não pode ser desfeita.`);
+
+    if (!confirmacao) {
+        console.log("Exclusão cancelada pelo usuário.");
+        return; // Para a execução se o usuário cancelar.
+    }
+
+    const loading = document.getElementById("loading");
+    loading.style.display = 'block';
+
+    try {
+        // 2. Executa o comando de delete no Supabase.
+        const { error } = await _supabase
+            .from('planos_de_treino')
+            .delete()
+            .eq('id', fichaId);
+
+        loading.style.display = 'none';
+
+        if (error) {
+            // Se der erro, mostra um alerta e loga no console.
+            console.error('Erro ao deletar a ficha:', error);
+            alert(`Ocorreu um erro ao deletar a ficha: ${error.message}`);
+        } else {
+            // Se der certo, mostra um alerta de sucesso.
+            alert(`Ficha "${fichaNome}" deletada com sucesso!`);
+            
+            // 3. Atualiza a lista de fichas na tela.
+            //    A função 'popularFichasExistentes' já busca e redesenha a lista.
+            if (currentAlunoId) {
+                popularFichasExistentes(currentAlunoId);
+            }
+        }
+    } catch (err) {
+        loading.style.display = 'none';
+        console.error("Erro inesperado na função deletarFicha:", err);
+        alert("Um erro inesperado ocorreu.");
     }
 }
 
@@ -525,6 +572,15 @@ const btnGerarIA = document.getElementById('btn-gerar-com-ia');
             document.getElementById('btn-editar-ficha').disabled = false;
             return;
         }
+        const deleteBtnClicado = event.target.closest('.delete-ficha-btn');
+
+    if (deleteBtnClicado) {
+        event.stopPropagation(); // Impede que o clique no botão selecione a ficha inteira.
+        const fichaId = deleteBtnClicado.dataset.fichaId;
+        const fichaNome = deleteBtnClicado.dataset.fichaNome;
+        deletarFicha(fichaId, fichaNome);
+        return; // Finaliza a execução para este clique.
+    }
         if (event.target.closest('#btn-editar-ficha')) {
             if (!event.target.closest('#btn-editar-ficha').disabled) {
                 if (fichaSelecionada) {
