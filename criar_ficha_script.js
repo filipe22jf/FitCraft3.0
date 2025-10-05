@@ -58,25 +58,48 @@ async function carregarExerciciosDoSite() {
  */
 // Arquivo: criar_ficha_script.js
 
+// SUBSTITUA A FUNÇÃO ANTIGA POR ESTA VERSÃO MELHORADA
+
 async function gerarTreinoComIA(promptDoPersonal) {
     const urlExercicios = 'https://exercicios-mauve.vercel.app/gif_index.json';
     const loadingDiv = document.getElementById('ia-loading' );
     if (loadingDiv) loadingDiv.style.display = 'block';
 
     try {
-        // Busca a lista de exercícios como antes
+        // 1. Carrega a lista completa de exercícios que você já tem.
         const responseExercicios = await fetch(urlExercicios);
-        if (!responseExercicios.ok) throw new Error('Falha ao buscar a lista de exercícios.');
+        if (!responseExercicios.ok) throw new Error('Falha ao buscar a lista de exercícios para a IA.');
         const listaDeExerciciosCompleta = await responseExercicios.json();
-        const listaFormatada = listaDeExerciciosCompleta.map(ex => `${ex.nome_exercicio} (Grupo: ${ex.grupo_muscular})`).join('\n');
 
-        // CHAMA A NOSSA PRÓPRIA API SEGURA!
+        // 2. Extrai APENAS os nomes dos exercícios para criar uma lista limpa.
+        //    Isso garante que a IA só veja os nomes exatos que existem na sua base.
+        const nomesDosExerciciosDisponiveis = listaDeExerciciosCompleta
+            .map(ex => ex.name) // Usando 'name' como está no seu exercicios.js
+            .filter(nome => nome); // Remove quaisquer nomes nulos ou vazios
+
+        // 3. MONTAGEM DO NOVO PROMPT (A PARTE MAIS IMPORTANTE)
+        //    Instruímos a IA de forma explícita a usar SOMENTE os nomes da lista.
+        const promptFinalParaIA = `
+            Você é um assistente especialista em criação de treinos de musculação.
+            Sua tarefa é criar um plano de treino com base na solicitação do personal trainer.
+
+            **REGRA MAIS IMPORTANTE:** Você DEVE OBRIGATORIAMENTE usar os nomes dos exercícios exatamente como eles aparecem na "LISTA DE EXERCÍCIOS DISPONÍVEIS" abaixo. Não invente, não abrevie e não modifique os nomes. Se um exercício pedido não estiver na lista, escolha o substituto mais próximo que ESTEJA na lista.
+
+            **SOLICITAÇÃO DO PERSONAL:** "${promptDoPersonal}"
+
+            **LISTA DE EXERCÍCIOS DISPONÍVEIS:**
+            ${nomesDosExerciciosDisponiveis.join('\n')}
+
+            Responda APENAS com o JSON do plano de treino, seguindo a estrutura de "dias_treino", "exercicios", etc.
+        `;
+
+        // 4. Envia o novo prompt super detalhado para a sua API.
         const response = await fetch('/api/gerar-treino', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                promptDoPersonal: promptDoPersonal,
-                listaFormatada: listaFormatada
+                // O prompt agora é o 'promptFinalParaIA', não mais o 'promptDoPersonal' direto.
+                promptDoPersonal: promptFinalParaIA 
             })
         });
 
