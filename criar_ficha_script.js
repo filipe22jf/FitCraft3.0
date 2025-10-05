@@ -238,35 +238,37 @@ async function preencherFichaComDadosDaIA(plano) {
 
     // Itera sobre os dias e exercícios
     plano.dias_treino.forEach(dia => {
-        if (dia.exercicios && Array.isArray(dia.exercicios)) {
-            dia.exercicios.forEach(ex => {
-                
-                // --- INÍCIO DA MELHORIA ---
-                // 2. Busca o exercício na biblioteca para encontrar a URL do GIF
-                const exercicioDaBiblioteca = bibliotecaExercicios.find(
-                    item => item.nome_exercicio.toLowerCase() === ex.nome.toLowerCase()
-                );
-                // --- FIM DA MELHORIA ---
+    if (dia.exercicios && Array.isArray(dia.exercicios)) {
+        dia.exercicios.forEach(ex => {
+            // --- INÍCIO DA CORREÇÃO ---
+            // Validação de segurança: Pula o exercício se ele for inválido ou não tiver um nome.
+            const nomeExercicioIA = ex.exercicio || ex.nome;
+            if (!nomeExercicioIA || typeof nomeExercicioIA !== 'string') {
+                console.warn("Exercício da IA ignorado por formato inválido:", ex);
+                return; // Pula para o próximo exercício do loop
+            }
+            // --- FIM DA CORREÇÃO ---
 
-                // Cria um objeto de exercício para cada um encontrado no JSON
-                const novoExercicio = {
-                    id: Date.now() + Math.random(),
-                    grupoMuscular: dia.grupo_muscular || 'Não especificado',
-                    exercicio: ex.exercicio || ex.nome,
-                    series: parseInt(ex.series) || 3,
-                    repeticoes: ex.repeticoes || '10-12',
-                    tecnica: ex.tecnica_avancada || 'Nenhuma',
-                    grupoTecnicaId: null,
-                    // --- INÍCIO DA MELHORIA ---
-                    // 3. Adiciona a URL do GIF ao objeto que será salvo!
-                    gif_url: exercicioDaBiblioteca ? exercicioDaBiblioteca.gif_url : null
-                    // --- FIM DA MELHORIA ---
-                };
-                
-                exerciciosAdicionados.push(novoExercicio);
-            });
-        }
-    });
+            // Agora podemos usar 'nomeExercicioIA' com segurança
+            const exercicioDaBiblioteca = bibliotecaExercicios.find(
+                item => item.nome_exercicio.toLowerCase() === nomeExercicioIA.toLowerCase()
+            );
+
+            const novoExercicio = {
+                id: Date.now() + Math.random(),
+                grupoMuscular: dia.grupo_muscular || 'Não especificado',
+                exercicio: nomeExercicioIA, // Usa a variável segura
+                series: parseInt(ex.series) || 3,
+                repeticoes: ex.repeticoes || '10-12',
+                tecnica: ex.tecnica_avancada || 'Nenhuma',
+                grupoTecnicaId: null,
+                gif_url: exercicioDaBiblioteca ? exercicioDaBiblioteca.gif_url : null
+            };
+            
+            exerciciosAdicionados.push(novoExercicio);
+        });
+    }
+});
 
     // Atualiza a interface para mostrar os exercícios adicionados
     atualizarListaExercicios();
