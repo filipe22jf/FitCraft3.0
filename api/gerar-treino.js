@@ -14,7 +14,7 @@ export default async function handler(request, response) {
         }
 
         // A chave secreta é lida das "Environment Variables" da Vercel
-        const OPENAI_API_KEY = process.env.VITE_OPENAI_API_KEY;
+        const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
         
         const promptDeSistema = `Você é um personal trainer de elite, especialista em criar treinos de musculação eficazes e seguros.
@@ -69,4 +69,5 @@ ${listaFormatada}
     } catch (error) {
         return response.status(500).json({ error: error.message });
     }
+
 }
