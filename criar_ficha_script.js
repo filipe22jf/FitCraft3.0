@@ -250,10 +250,33 @@ async function preencherFichaComDadosDaIA(plano) {
             // --- FIM DA CORREÇÃO ---
 
             // Agora podemos usar 'nomeExercicioIA' com segurança
-           const exercicioDaBiblioteca = bibliotecaExercicios.find(item => 
-    item && item.nome_exercicio && typeof item.nome_exercicio === 'string' &&
-    item.nome_exercicio.toLowerCase().includes(nomeExercicioIA.toLowerCase())
-);
+           // TRECHO FINAL (Busca Bidirecional + Log de Depuração)
+
+let exercicioDaBiblioteca = null; // Inicializa como nulo
+
+// Normaliza o nome da IA uma vez para reutilizar
+const nomeIALimpo = nomeExercicioIA.toLowerCase();
+
+exercicioDaBiblioteca = bibliotecaExercicios.find(item => {
+    // Garante que o item da biblioteca é válido
+    if (!item || !item.nome_exercicio || typeof item.nome_exercicio !== 'string') {
+        return false;
+    }
+    const nomeBibliotecaLimpo = item.nome_exercicio.toLowerCase();
+
+    // LÓGICA DE BUSCA BIDIRECIONAL:
+    // 1. O nome da biblioteca contém o nome da IA? (Ex: "Agachamento Livre" contém "Agachamento")
+    // 2. OU o nome da IA contém o nome da biblioteca? (Ex: "Agachamento" contém "Agachamento Livre")
+    return nomeBibliotecaLimpo.includes(nomeIALimpo) || nomeIALimpo.includes(nomeBibliotecaLimpo);
+});
+
+// --- LOG DE DEPURAÇÃO ---
+// Se, mesmo após a busca, não encontrarmos um GIF, vamos registrar o porquê.
+if (!exercicioDaBiblioteca) {
+    console.log(`[DEBUG] GIF não encontrado para: "${nomeExercicioIA}". Nenhum nome correspondente na biblioteca.`);
+}
+// --- FIM DO LOG ---
+
 
             const novoExercicio = {
                 id: Date.now() + Math.random(),
