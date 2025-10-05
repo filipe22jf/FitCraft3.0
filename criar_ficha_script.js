@@ -65,19 +65,19 @@ async function gerarTreinoComIA(promptDoPersonal) {
     if (loadingDiv) loadingDiv.style.display = 'block';
 
     try {
-        // Envia apenas o prompt do personal, mantendo a requisição pequena.
+        // Envia o prompt do personal e uma lista VAZIA para satisfazer a API.
         const response = await fetch('/api/gerar-treino', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                promptDoPersonal: promptDoPersonal 
+                promptDoPersonal: promptDoPersonal,
+                listaFormatada: "" // <-- A CORREÇÃO ESTÁ AQUI! Enviamos o campo, mas vazio.
             })
         });
 
         if (!response.ok) {
-            // Tenta ler a mensagem de erro da API, se houver.
-            const errorData = await response.json().catch(() => ({ error: { message: 'Erro desconhecido' } }));
-            throw new Error(`Falha na API: ${errorData.error.message}`);
+            const errorData = await response.json().catch(() => ({ error: { message: 'Erro desconhecido na resposta da API' } }));
+            throw new Error(`Falha na API: ${errorData.error?.message || 'Formato de erro inesperado'}`);
         }
 
         const planoDeTreino = await response.json();
@@ -92,7 +92,6 @@ async function gerarTreinoComIA(promptDoPersonal) {
         return null;
     }
 }
-
 
 
 const tecnicasDescricoes = { "Drop set": "Realizar o exercício até a falha e reduzir o peso para continuar até a falha novamente.", "Rest-pause": "Ir até a falha, descansar 10–20s e continuar com o mesmo peso.", "Bi-set": "Dois exercícios em sequência sem descanso.", "Tri-set": "Três exercícios em sequência sem descanso.", "Giant set": "Quatro ou mais exercícios em sequência sem descanso.", "Super-set": "Dois exercícios de grupos opostos sem descanso.", "Pré-exaustão": "Exercício isolado antes do composto para o mesmo músculo.", "Pós-exaustão": "Exercício isolado após o composto para o mesmo músculo.", "Isometria": "Manter a contração por tempo definido.", "Parciais": "Repetições com amplitude reduzida na parte mais difícil.", "Forçada": "Ajuda do parceiro nas últimas repetições.", "Negativa": "Ênfase na fase excêntrica, descendo de forma lenta.", "Cluster set": "Dividir a série em mini-blocos com pequenos descansos.", "Piramidal crescente": "Aumenta peso e reduz repetições a cada série.", "Piramidal decrescente": "Reduz peso e aumenta repetições a cada série.", "FST-7": "7 séries de 10–15 repetições com 30–45s de descanso, geralmente no final." };
