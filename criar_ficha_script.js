@@ -209,7 +209,7 @@ function removerExercicioDoGrupo(grupoId) {
     if (exerciciosAdicionados.length === 0) { document.getElementById("pdf-section").style.display = "none"; }
 }
 
-function preencherFichaComDadosDaIA(plano) {
+async function preencherFichaComDadosDaIA(plano) {
     // Validação robusta para garantir que o plano e a estrutura estão corretos
     if (!plano || !plano.dias_treino || !Array.isArray(plano.dias_treino)) {
         alert('A IA retornou um formato de treino inválido. Por favor, tente novamente.');
@@ -217,10 +217,17 @@ function preencherFichaComDadosDaIA(plano) {
         return;
     }
 
-    // 1. Limpa a ficha atual para receber os novos dados
+    // --- INÍCIO DA MELHORIA ---
+    // 1. Carrega a biblioteca de exercícios completa para termos acesso aos GIFs
+    const urlExercicios = 'https://exercicios-mauve.vercel.app/gif_index.json';
+    const response = await fetch(urlExercicios );
+    const bibliotecaExercicios = await response.json();
+    // --- FIM DA MELHORIA ---
+
+    // Limpa a ficha atual para receber os novos dados
     limparDadosFicha();
 
-    // 2. Preenche os dados principais da ficha
+    // Preenche os dados principais da ficha
     const nomeDaFicha = plano.nome_ficha || 'Treino Gerado por IA';
     document.getElementById('nome-ficha').value = nomeDaFicha;
     document.getElementById('dados-ficha-section').style.display = 'block';
@@ -229,29 +236,39 @@ function preencherFichaComDadosDaIA(plano) {
     document.getElementById('modo-edicao').textContent = '(Gerado por IA)';
     document.getElementById('nome-ficha-atual').textContent = `- ${nomeDaFicha}`;
 
-    // 3. A MÁGICA ACONTECE AQUI: Itera sobre TODOS os dias e TODOS os exercícios
+    // Itera sobre os dias e exercícios
     plano.dias_treino.forEach(dia => {
-        // Verifica se o dia tem a estrutura correta
         if (dia.exercicios && Array.isArray(dia.exercicios)) {
             dia.exercicios.forEach(ex => {
+                
+                // --- INÍCIO DA MELHORIA ---
+                // 2. Busca o exercício na biblioteca para encontrar a URL do GIF
+                const exercicioDaBiblioteca = bibliotecaExercicios.find(
+                    item => item.nome_exercicio.toLowerCase() === ex.nome.toLowerCase()
+                );
+                // --- FIM DA MELHORIA ---
+
                 // Cria um objeto de exercício para cada um encontrado no JSON
                 const novoExercicio = {
-    id: Date.now() + Math.random(),
-    grupoMuscular: dia.grupo_muscular || 'Não especificado',
-    exercicio: ex.exercicio || ex.nome, // <--- A MÁGICA ESTÁ AQUI!
-    series: parseInt(ex.series) || 3,
-    repeticoes: ex.repeticoes || '10-12',
-    tecnica: ex.tecnica_avancada || 'Nenhuma',
-    grupoTecnicaId: null
-};
-
-                // Adiciona o exercício à nossa lista global
+                    id: Date.now() + Math.random(),
+                    grupoMuscular: dia.grupo_muscular || 'Não especificado',
+                    exercicio: ex.exercicio || ex.nome,
+                    series: parseInt(ex.series) || 3,
+                    repeticoes: ex.repeticoes || '10-12',
+                    tecnica: ex.tecnica_avancada || 'Nenhuma',
+                    grupoTecnicaId: null,
+                    // --- INÍCIO DA MELHORIA ---
+                    // 3. Adiciona a URL do GIF ao objeto que será salvo!
+                    gif_url: exercicioDaBiblioteca ? exercicioDaBiblioteca.gif_url : null
+                    // --- FIM DA MELHORIA ---
+                };
+                
                 exerciciosAdicionados.push(novoExercicio);
             });
         }
     });
 
-    // 4. Atualiza a interface para mostrar TODOS os exercícios adicionados
+    // Atualiza a interface para mostrar os exercícios adicionados
     atualizarListaExercicios();
     atualizarContadorExercicios();
     document.getElementById("pdf-section").style.display = "block";
