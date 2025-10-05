@@ -250,10 +250,9 @@ async function preencherFichaComDadosDaIA(plano) {
             // --- FIM DA CORREÇÃO ---
 
             // Agora podemos usar 'nomeExercicioIA' com segurança
-            const exercicioDaBiblioteca = bibliotecaExercicios.find(item => 
-    // VERIFICAÇÃO DE SEGURANÇA: Garante que o item da biblioteca é válido ANTES de comparar.
+           const exercicioDaBiblioteca = bibliotecaExercicios.find(item => 
     item && item.nome_exercicio && typeof item.nome_exercicio === 'string' &&
-    item.nome_exercicio.toLowerCase() === nomeExercicioIA.toLowerCase()
+    item.nome_exercicio.toLowerCase().includes(nomeExercicioIA.toLowerCase())
 );
 
             const novoExercicio = {
