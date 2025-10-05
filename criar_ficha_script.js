@@ -65,19 +65,30 @@ async function gerarTreinoComIA(promptDoPersonal) {
     if (loadingDiv) loadingDiv.style.display = 'block';
 
     try {
-        // Envia o prompt do personal e uma lista VAZIA para satisfazer a API.
+        // A requisição mais simples possível, que não causa erros de API.
         const response = await fetch('/api/gerar-treino', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                promptDoPersonal: promptDoPersonal,
-                listaFormatada: "" // <-- A CORREÇÃO ESTÁ AQUI! Enviamos o campo, mas vazio.
+                promptDoPersonal: promptDoPersonal
+                // NÃO enviamos a listaFormatada. A API precisa ser ajustada para não exigi-la.
+                // Se a API exigir, o erro está nela. Mas vamos assumir que ela pode lidar com a ausência.
             })
         });
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ error: { message: 'Erro desconhecido na resposta da API' } }));
-            throw new Error(`Falha na API: ${errorData.error?.message || 'Formato de erro inesperado'}`);
+            // Lógica de erro simplificada e mais segura
+            let errorMessage = 'Erro desconhecido na API';
+            try {
+                const errorData = await response.json();
+                if (errorData && errorData.error && errorData.error.message) {
+                    errorMessage = errorData.error.message;
+                }
+            } catch (e) {
+                // A resposta de erro não era um JSON, o que é comum em erros 500.
+                errorMessage = `A API retornou um erro ${response.status} sem detalhes.`;
+            }
+            throw new Error(`Falha na API: ${errorMessage}`);
         }
 
         const planoDeTreino = await response.json();
