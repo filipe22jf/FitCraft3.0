@@ -380,7 +380,7 @@ async function popularFichasExistentes(alunoId) {
         <p>Data: ${dataFormatada} | ${numExercicios} exercício(s)</p>
     </div>
     <button class="delete-ficha-btn" data-ficha-id="${plan.id}" data-ficha-nome="${plan.name}" title="Deletar esta ficha">
-        🗑️
+        &times;
     </button>
 `;
         fichasContainer.appendChild(fichaItem);

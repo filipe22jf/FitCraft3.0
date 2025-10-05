@@ -508,3 +508,28 @@ body {
         gap: 0.5rem;
     }
 }
+.delete-ficha-btn {
+    background-color: #333; /* Fundo cinza escuro para ser visível */
+    color: var(--texto-principal); /* Cor do texto (o "X") */
+    border: 1px solid var(--borda-elementos);
+    border-radius: 50%; /* Deixa o botão redondo */
+    width: 28px; /* Largura fixa */
+    height: 28px; /* Altura fixa */
+    cursor: pointer;
+    font-size: 1.2rem; /* Tamanho do "X" */
+    font-weight: bold;
+    line-height: 26px; /* Centraliza o "X" verticalmente */
+    text-align: center; /* Centraliza o "X" horizontalmente */
+    padding: 0;
+    margin-left: 1rem; /* Espaço entre o texto e o botão */
+    flex-shrink: 0; /* Impede que o botão encolha */
+    opacity: 0.7;
+    transition: all 0.2s ease-in-out;
+}
+
+.delete-ficha-btn:hover {
+    background-color: var(--cor-perigo); /* Fica vermelho ao passar o mouse */
+    color: white;
+    opacity: 1;
+    transform: scale(1.1);
+}
