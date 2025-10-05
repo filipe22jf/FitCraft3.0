@@ -210,6 +210,7 @@ function removerExercicioDoGrupo(grupoId) {
 }
 
 function preencherFichaComDadosDaIA(plano) {
+    // Validação robusta para garantir que o plano e a estrutura estão corretos
     if (!plano || !plano.dias_treino || !Array.isArray(plano.dias_treino)) {
         alert('A IA retornou um formato de treino inválido. Por favor, tente novamente.');
         console.error("Formato inválido recebido da IA:", plano);
@@ -220,17 +221,20 @@ function preencherFichaComDadosDaIA(plano) {
     limparDadosFicha();
 
     // 2. Preenche os dados principais da ficha
-    document.getElementById('nome-ficha').value = plano.nome_ficha || 'Treino Gerado por IA';
+    const nomeDaFicha = plano.nome_ficha || 'Treino Gerado por IA';
+    document.getElementById('nome-ficha').value = nomeDaFicha;
     document.getElementById('dados-ficha-section').style.display = 'block';
     document.getElementById('adicionar-exercicio-section').style.display = 'block';
     document.getElementById('ficha-atual-section').style.display = 'block';
     document.getElementById('modo-edicao').textContent = '(Gerado por IA)';
-    document.getElementById('nome-ficha-atual').textContent = `- ${plano.nome_ficha || 'Treino Gerado por IA'}`;
+    document.getElementById('nome-ficha-atual').textContent = `- ${nomeDaFicha}`;
 
-    // 3. Itera sobre os dias e exercícios e os adiciona na lista de exercícios
+    // 3. A MÁGICA ACONTECE AQUI: Itera sobre TODOS os dias e TODOS os exercícios
     plano.dias_treino.forEach(dia => {
+        // Verifica se o dia tem a estrutura correta
         if (dia.exercicios && Array.isArray(dia.exercicios)) {
             dia.exercicios.forEach(ex => {
+                // Cria um objeto de exercício para cada um encontrado no JSON
                 const novoExercicio = {
                     id: Date.now() + Math.random(), // ID único para evitar conflitos
                     grupoMuscular: dia.grupo_muscular || 'Não especificado',
@@ -240,17 +244,18 @@ function preencherFichaComDadosDaIA(plano) {
                     tecnica: ex.tecnica_avancada || 'Nenhuma',
                     grupoTecnicaId: null
                 };
+                // Adiciona o exercício à nossa lista global
                 exerciciosAdicionados.push(novoExercicio);
             });
         }
     });
 
-    // 4. Atualiza a interface para mostrar os exercícios adicionados
+    // 4. Atualiza a interface para mostrar TODOS os exercícios adicionados
     atualizarListaExercicios();
     atualizarContadorExercicios();
     document.getElementById("pdf-section").style.display = "block";
     
-    alert('Ficha de treino preenchida com sucesso pela IA!');
+    alert('Ficha de treino completa preenchida com sucesso pela IA!');
 }
 
 function atualizarContadorExercicios() { document.querySelector(".counter").textContent = `${exerciciosAdicionados.length} exercício(s) adicionado(s)`; }
