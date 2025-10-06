@@ -629,8 +629,7 @@ const btnGerarIA = document.getElementById('btn-gerar-com-ia');
             salvarFichaOnline();
         } else if (event.target.closest('#btn-gerar-pdf')) {
             gerarPDF();
-        } else if (event.target.closest('.add-exercise-btn[onclick="adicionarExercicio()"]')) {
-            adicionarExercicio();
+              adicionarExercicio();
         } else if (event.target.closest('#btn-cancelar-edicao')) {
             document.getElementById('dados-ficha-section').style.display = 'none';
             document.getElementById('adicionar-exercicio-section').style.display = 'none';
