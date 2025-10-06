@@ -237,6 +237,29 @@ body {
 input[type="date"].form-input {
     max-width: 100%;
     box-sizing: border-box;
+    -webkit-appearance: none; /* Remove estilo padrão do Safari/iOS */
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Força o tamanho correto em mobile */
+@media (max-width: 480px) {
+    input[type="date"].form-input {
+        width: 100% !important;
+        min-width: 0;
+        flex: 1;
+    }
+    
+    /* Garante que o grid-2-colunas funcione corretamente */
+    .grid-2-colunas {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .grid-2-colunas .form-group {
+        min-width: 0; /* Permite que os filhos encolham */
+    }
 }
 .botoes-container, .botoes-finalizar {
     display: flex;
@@ -475,21 +498,26 @@ input[type="date"].form-input {
 
 /* --- Estilos para Celulares (480px de largura ou menos) --- */
 @media (max-width: 480px) {
+    .container {
+        padding: 0; /* Remove o padding do container em mobile */
+    }
+    
     .main-content, .content-section {
         padding-left: 10px;
         padding-right: 10px;
-        padding-top: 0.75rem; /* Reduzi ainda mais no mobile */
+        padding-top: 0.75rem;
         padding-bottom: 0.75rem;
         margin-top: 70px;
     }
 
     .card, .stat-card, .form-card {
         padding: 1rem;
-        margin-bottom: 0.75rem; /* Menos espaço entre cards no mobile */
+        margin-bottom: 0.75rem;
     }
 
     h1 {
         font-size: 1.5rem;
+        margin-bottom: 0.5rem; /* Reduz espaço após títulos */
     }
 
     .form-input, .form-group select, .form-group textarea {
@@ -508,6 +536,7 @@ input[type="date"].form-input {
         gap: 0.5rem;
     }
 }
+
 .delete-ficha-btn {
     background-color: #333; /* Fundo cinza escuro para ser visível */
     color: var(--texto-principal); /* Cor do texto (o "X") */
