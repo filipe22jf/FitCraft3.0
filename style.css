@@ -102,9 +102,9 @@ body {
 
 /* 3. ConteÃºdo Principal e Cards */
 .main-content, .content-section {
-    padding: 2rem;
+    padding: 1rem 2rem; /* Reduzi o padding vertical */
     max-width: 1200px;
-    margin: 100px auto 0 auto;
+    margin: 90px auto 0 auto; /* Reduzi a margem superior */
 }
 
 .card, .stat-card, .form-card {
@@ -112,7 +112,7 @@ body {
     border: 1px solid var(--borda-elementos);
     border-radius: 16px;
     padding: 1.5rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem; /* Reduzi o espaço entre os cards */
 }
 
 .dashboard-grid {
@@ -234,6 +234,10 @@ body {
 }
 .pdf-btn:hover { opacity: 0.8; }
 
+input[type="date"].form-input {
+    max-width: 100%;
+    box-sizing: border-box;
+}
 .botoes-container, .botoes-finalizar {
     display: flex;
     gap: 1rem;
@@ -444,12 +448,12 @@ body {
 /* --- Estilos para Tablets (768px de largura ou menos) --- */
 @media (max-width: 768px) {
     .main-content, .content-section {
-        padding: 1.5rem;
-        margin-top: 80px;
+        margin-top: 80px; /* Mantém apenas isso aqui */
     }
 
     .card, .stat-card, .form-card {
         padding: 1.25rem;
+        margin-bottom: 0.75rem; /* Adicionei esta linha */
     }
 
     h1 {
@@ -471,21 +475,17 @@ body {
 
 /* --- Estilos para Celulares (480px de largura ou menos) --- */
 @media (max-width: 480px) {
-    /* 
-     * AQUI ESTÁ O AJUSTE FINO:
-     * Reduzimos o padding lateral para apenas 10px.
-     * Isso vai "alargar" o conteúdo, mantendo a estrutura de cards.
-    */
     .main-content, .content-section {
-        padding-left: 10px;  /* << MUDANÇA PRINCIPAL */
-        padding-right: 10px; /* << MUDANÇA PRINCIPAL */
-        padding-top: 1rem;
-        padding-bottom: 1rem;
+        padding-left: 10px;
+        padding-right: 10px;
+        padding-top: 0.75rem; /* Reduzi ainda mais no mobile */
+        padding-bottom: 0.75rem;
         margin-top: 70px;
     }
 
     .card, .stat-card, .form-card {
         padding: 1rem;
+        margin-bottom: 0.75rem; /* Menos espaço entre cards no mobile */
     }
 
     h1 {
