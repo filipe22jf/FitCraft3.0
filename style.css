@@ -126,7 +126,7 @@ body {
 .stat-label { font-size: 0.9rem; color: var(--texto-secundario); text-transform: uppercase; }
 .stat-card { text-align: center; }
 
-/* 4. GrÃ¡fico e Atividades */
+/* 4. Gráfico e Atividades */
 .chart-container { padding: 1.5rem; }
 .chart {
     background-color: var(--preto-card);
@@ -136,6 +136,158 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* 4.1 Estilos para Lista de Exercícios */
+.exercise-item {
+    background: linear-gradient(135deg, var(--preto-card) 0%, #0f0f0f 100%);
+    border: 1px solid var(--borda-elementos);
+    border-left: 4px solid var(--cor-destaque);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.exercise-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 255, 127, 0.15);
+    border-left-color: var(--cor-link);
+}
+
+.exercise-item h3 {
+    color: var(--texto-principal);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    padding-right: 40px; /* Espaço para o botão X */
+}
+
+.exercise-item .details {
+    color: var(--texto-secundario);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.exercise-item .technique {
+    display: inline-block;
+    background-color: rgba(0, 191, 255, 0.1);
+    border: 1px solid var(--cor-link);
+    color: var(--cor-link);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
+
+.remove-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background-color: rgba(255, 20, 147, 0.2);
+    color: var(--cor-perigo);
+    border: 1px solid var(--cor-perigo);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 1.5rem;
+    line-height: 30px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.remove-btn:hover {
+    background-color: var(--cor-perigo);
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Estilos para grupos de exercícios */
+.exercise-group {
+    background-color: rgba(255, 152, 0, 0.05);
+    border: 2px solid #ff9800;
+    border-radius: 16px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.group-header {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.remove-btn-group {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 1.3rem;
+    line-height: 26px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.remove-btn-group:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+    transform: scale(1.1);
+}
+
+.exercise-item-grouped {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background-color: var(--preto-card);
+    border-radius: 8px;
+    border-left: 3px solid #ff9800;
+}
+
+.exercise-item-grouped:last-child {
+    margin-bottom: 0;
+}
+
+.group-order {
+    background-color: #ff9800;
+    color: white;
+    font-weight: 700;
+    font-size: 0.9rem;
+    min-width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.group-details {
+    flex: 1;
+}
+
+.group-details h3 {
+    color: var(--texto-principal);
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.group-details .details {
+    color: var(--texto-secundario);
+    font-size: 0.85rem;
 }
 
 .activity-item {
