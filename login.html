@@ -3,24 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>FitCraft Personal - Login</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="/fitcraft_personal_logo.png">
     <link rel="apple-touch-icon" href="images/icons/icon-152x152.png">
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #000000;
+            --card-bg: #0a0a0a;
+            --text: #ffffff;
+            --text-dim: #888888;
+            --accent-green: #00ff7f;
+            --accent-blue: #00d4ff;
+            --border: rgba(255, 255, 255, 0.08);
+            --error: #ff4d4d;
+            --success: #28a745;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .bg-animated {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            background: linear-gradient(135deg, #0d0d0d 0%, #1a1a2e 100%);
+        }
+
+        .bg-animated::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(0, 255, 127, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -250px;
+            left: -250px;
+            animation: float1 20s infinite ease-in-out;
+        }
+
+        .bg-animated::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: -200px;
+            right: -200px;
+            animation: float2 15s infinite ease-in-out;
+        }
+
+        @keyframes float1 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(100px, 100px); }
+        }
+
+        @keyframes float2 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-80px, -80px); }
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 450px;
+            padding: 2rem;
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .auth-card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .auth-logo {
+            display: block;
+            margin: 0 auto 2rem;
+            max-width: 150px;
+            height: auto;
+        }
+
+        .auth-subtitle {
+            text-align: center;
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-dim);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .auth-button {
+            width: 100%;
+            padding: 1.2rem;
+            background: var(--accent-green);
+            color: #000;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 127, 0.3);
+        }
+
+        .auth-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message, .success-message {
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .error-message {
+            background: rgba(255, 77, 77, 0.1);
+            border: 1px solid rgba(255, 77, 77, 0.3);
+            color: var(--error);
+        }
+
+        .success-message {
+            background: rgba(40, 167, 69, 0.1);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+            color: var(--success);
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                padding: 1rem;
+            }
+
+            .auth-card {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="bg-animated"></div>
+    
     <div class="auth-container">
         <div class="auth-card">
             <img src="images/fitcraft_logo.png" alt="FitCraft Logo" class="auth-logo">
             <p class="auth-subtitle">Entre na sua conta para gerenciar seus clientes e fichas de treino</p>
             
-            <div id="error-message" class="error-message" style="display: none; background: #ff4d4d; color: white; padding: 12px; border-radius: 8px; margin-bottom: 20px;"></div>
-            <div id="success-message" class="success-message" style="display: none; background: #28a745; color: white; padding: 12px; border-radius: 8px; margin-bottom: 20px;"></div>
+            <div id="error-message" class="error-message" style="display: none;"></div>
+            <div id="success-message" class="success-message" style="display: none;"></div>
             
             <form id="login-form">
                 <div class="form-group">
@@ -35,22 +228,15 @@
                 
                 <button type="submit" id="login-button" class="auth-button">Entrar</button>
             </form>
-            
-            <p>
-            </p>
         </div>
     </div>
 
-    <!-- =============================================== -->
-    <!--           ORDEM DE SCRIPTS CORRIGIDA            -->
-    <!-- =============================================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-client.js"></script> <!-- 1. Cria a variável _supabase -->
-    <script src="supabase-auth.js"></script>   <!-- 2. Usa _supabase para criar fitCraftAuth -->
+    <script src="supabase-client.js"></script>
+    <script src="supabase-auth.js"></script>
     
     <script>
-        // 3. Agora este script pode usar fitCraftAuth sem erro
-        document.addEventListener('DOMContentLoaded', function( ) {
+        document.addEventListener('DOMContentLoaded', function() {
             const loginForm = document.getElementById('login-form');
             const loginButton = document.getElementById('login-button');
             const errorMessage = document.getElementById('error-message');
@@ -80,7 +266,6 @@
                     if (!result.success) {
                         showError(result.error || 'Erro ao fazer login. Verifique suas credenciais.');
                     }
-                    // Se o login for bem-sucedido, o supabase-auth.js fará o redirecionamento.
                 } catch (error) {
                     showError('Erro inesperado. Tente novamente.');
                 } finally {

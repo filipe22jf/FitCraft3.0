@@ -4,64 +4,115 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FitCraft Personal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2c3e50">
+    <meta name="theme-color" content="#000000">
     <link rel="icon" type="image/png" href="/fitcraft_personal_logo.png">
-    
-    <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
-        :root {
-            --preto-fundo: #000000;
-            --preto-card: #0a0a0a;
-            --borda-elementos: #2a2a2a;
-            --texto-principal: #e5e5e5;
-            --texto-secundario: #808080;
-            --cor-destaque: #00ff7f;
-        }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --bg: #000000;
+            --card-bg: #0a0a0a;
+            --text: #ffffff;
+            --text-dim: #888888;
+            --accent-green: #00ff7f;
+            --accent-blue: #00d4ff;
+            --border: rgba(255, 255, 255, 0.08);
+            --error: #ff4d4d;
+        }
+
         body {
             font-family: 'Montserrat', sans-serif;
-            background-color: var(--preto-fundo);
-            color: var(--texto-principal);
+            background: var(--bg);
+            color: var(--text);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .bg-animated {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            background: linear-gradient(135deg, #0d0d0d 0%, #1a1a2e 100%);
+        }
+
+        .bg-animated::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(0, 255, 127, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -250px;
+            left: -250px;
+            animation: float1 20s infinite ease-in-out;
+        }
+
+        .bg-animated::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: -200px;
+            right: -200px;
+            animation: float2 15s infinite ease-in-out;
+        }
+
+        @keyframes float1 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(100px, 100px); }
+        }
+
+        @keyframes float2 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-80px, -80px); }
         }
 
         .loading-container {
             text-align: center;
             padding: 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
         }
 
         .logo {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--cor-destaque);
             margin-bottom: 2rem;
+        }
+
+        .logo img {
+            max-width: 200px;
+            height: auto;
         }
 
         .loading-spinner {
             display: inline-block;
             width: 50px;
             height: 50px;
-            border: 4px solid var(--borda-elementos);
+            border: 4px solid var(--border);
             border-radius: 50%;
-            border-top-color: var(--cor-destaque);
+            border-top-color: var(--accent-green);
             animation: spin 1s linear infinite;
             margin-bottom: 1rem;
         }
@@ -71,41 +122,59 @@
         }
 
         .loading-text {
-            color: var(--texto-secundario);
+            color: var(--text-dim);
             font-size: 1.1rem;
+            margin-top: 1rem;
         }
 
         .error-message {
-            background-color: var(--preto-card);
-            border: 1px solid #ff1493;
+            background: rgba(255, 77, 77, 0.1);
+            border: 1px solid rgba(255, 77, 77, 0.3);
             border-radius: 12px;
             padding: 1.5rem;
-            margin-top: 1rem;
-            color: #ff1493;
+            margin-top: 1.5rem;
+            color: var(--error);
+        }
+
+        .error-message strong {
+            display: block;
+            margin-bottom: 0.5rem;
         }
 
         .retry-button {
-            background-color: var(--cor-destaque);
-            color: var(--preto-fundo);
+            background: var(--accent-green);
+            color: #000;
             border: none;
             border-radius: 8px;
             padding: 0.8rem 1.5rem;
             font-weight: 600;
             cursor: pointer;
             margin-top: 1rem;
-            transition: opacity 0.3s;
+            transition: all 0.3s ease;
         }
 
         .retry-button:hover {
-            opacity: 0.8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 127, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .loading-container {
+                padding: 1.5rem;
+            }
+
+            .logo img {
+                max-width: 150px;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="bg-animated"></div>
+    
     <div class="loading-container">
         <div class="logo">
-    <img src="fitcraft_personal_logo.png" alt="Minha Logo" style="height: 200px; width: auto;">
-    <!-- Ajuste o height/width conforme necessário para sua logo -->
+            <img src="fitcraft_personal_logo.png" alt="FitCraft Personal">
         </div>
         
         <div class="loading-spinner"></div>
@@ -120,11 +189,9 @@
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="supabase-client.js"></script>
     
     <script>
-        // Aguardar o cliente Supabase estar disponível
         function waitForSupabase() {
             return new Promise((resolve) => {
                 if (window._supabase) {
@@ -135,18 +202,14 @@
             });
         }
 
-        // Função principal de verificação de autenticação
         async function checkAuth() {
             try {
-                // Esconder mensagem de erro se estiver visível
                 document.getElementById('errorContainer').style.display = 'none';
                 
-                // Aguardar cliente Supabase
                 await waitForSupabase();
                 
                 console.log('Cliente Supabase carregado, verificando sessão...');
                 
-                // Verificar sessão atual
                 const { data: { session }, error } = await window._supabase.auth.getSession();
                 
                 if (error) {
@@ -155,29 +218,23 @@
                 
                 if (session && session.user) {
                     console.log('Usuário autenticado, redirecionando para dashboard...');
-                    // Usuário está logado, redirecionar para dashboard
                     window.location.replace('dashboard.html');
                 } else {
                     console.log('Usuário não autenticado, redirecionando para login...');
-                    // Usuário não está logado, redirecionar para login
                     window.location.replace('login.html');
                 }
                 
             } catch (error) {
                 console.error('Erro na verificação de autenticação:', error);
                 
-                // Mostrar mensagem de erro
                 document.getElementById('errorMessage').textContent = error.message;
                 document.getElementById('errorContainer').style.display = 'block';
             }
         }
 
-        // Iniciar verificação quando a página carregar
         document.addEventListener('DOMContentLoaded', () => {
-            // Aguardar um pouco para garantir que tudo está carregado
             setTimeout(checkAuth, 500);
         });
     </script>
 </body>
 </html>
-
