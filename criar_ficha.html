@@ -493,7 +493,17 @@
             to { transform: rotate(360deg); }
         }
 
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-dim);
+        }
+
         @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
             .grid-tecnica-obs {
                 grid-template-columns: 1fr;
             }
@@ -510,6 +520,15 @@
                 width: 100%;
                 max-width: 200px;
             }
+
+            .form-card h3 {
+                font-size: 1.2rem;
+            }
+
+            .botoes-container,
+            .botoes-finalizar {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -523,7 +542,7 @@
 
         <!-- Selecionar Aluno -->
         <div class="form-card">
-            <h3> Selecionar Aluno</h3>
+            <h3>Selecionar Aluno</h3>
             <div class="form-group">
                 <label class="form-label">Selecione o Aluno *</label>
                 <select id="select-aluno" class="form-input">
