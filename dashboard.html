@@ -3,21 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="/fitcraft_personal_logo.png">
+    <title>Dashboard - FitCraft Personal</title>
     <style>
         :root {
-            --preto-fundo: #000000;
-            --preto-card: #0a0a0a;
-            --borda-elementos: #2a2a2a;
-            --texto-principal: #e5e5e5;
-            --texto-secundario: #808080;
-            --cor-destaque: #00ff7f;
-            --cor-link: #00bfff;
-            --cor-perigo: #ff1493;
-            --cor-aviso: #ffc107;
-            --cor-pdf: #ff6347;
+            /* Color System - Black Theme */
+            --bg: #000000;
+            --card-bg: #0a0a0a;
+            --text: #ffffff;
+            --text-dim: #888888;
+            --accent-green: #00ff7f;
+            --accent-blue: #00d4ff;
+            --border: rgba(255, 255, 255, 0.08);
+            
+            /* Additional colors */
+            --primary: #00d4ff;
+            --primary-dark: #00bfff;
+            --primary-light: #00e5ff;
+            --secondary: #00ff7f;
+            --accent: #00ff7f;
+            --warning: #ffc107;
+            
+            /* Glass Effect */
+            --glass-bg: rgba(255, 255, 255, 0.02);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            
+            /* Neutral System */
+            --white: #FFFFFF;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-400: #9CA3AF;
+            --gray-500: #6B7280;
+            --gray-600: #4B5563;
+            --gray-700: #374151;
+            --gray-800: #1F2937;
+            --gray-900: #111827;
+            
+            /* Spacing */
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+            
+            /* Border Radius */
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-2xl: 1.5rem;
+            
+            /* Typography */
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
 
         * {
@@ -27,10 +69,54 @@
         }
 
         body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: var(--preto-fundo);
-            color: var(--texto-principal);
+            font-family: var(--font-sans);
+            background: linear-gradient(135deg, #0d0d0d 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            color: var(--white);
             line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background Pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(0, 255, 127, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -250px;
+            left: -250px;
+            animation: float1 20s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: -200px;
+            right: -200px;
+            animation: float2 15s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes float1 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(100px, 100px); }
+        }
+
+        @keyframes float2 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-80px, -80px); }
         }
 
         /* Header Responsivo */
@@ -39,27 +125,46 @@
             top: 0;
             left: 0;
             right: 0;
-            background-color: var(--preto-fundo);
-            border-bottom: 1px solid var(--borda-elementos);
+            height: 64px;
+            background: #0d0d0d;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
             z-index: 1000;
-            padding: 1rem;
+            padding: 0 var(--space-lg);
         }
 
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1200px;
+            max-width: 1400px;
+            height: 100%;
             margin: 0 auto;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 1.5rem;
+            gap: var(--space-sm);
+        }
+
+        .logo-image {
+            height: 45px;
+            width: auto;
+            object-fit: contain;
+            transition: all 0.3s ease;
+        }
+
+        .logo-image:hover {
+            transform: translateY(-2px);
+            filter: drop-shadow(0 4px 8px rgba(0, 255, 127, 0.3));
+        }
+
+        .logo-text {
+            font-size: 1.125rem;
             font-weight: 700;
-            color: var(--cor-destaque);
+            color: var(--white);
+            letter-spacing: -0.02em;
         }
 
         .header-logo {
@@ -69,44 +174,47 @@
         }
 
         .hamburger {
-            background: none;
-            border: 1px solid var(--borda-elementos);
-            border-radius: 8px;
-            width: 44px;
-            height: 44px;
-            cursor: pointer;
-            color: var(--texto-principal);
+            width: 40px;
+            height: 40px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 5px;
-            transition: background-color 0.3s, border-color 0.3s;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
         .hamburger:hover {
-            background-color: var(--preto-card);
-            border-color: var(--cor-destaque);
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
         }
 
         .hamburger span {
-            width: 25px;
+            width: 18px;
             height: 2px;
-            background: var(--texto-principal);
+            background: var(--white);
+            border-radius: 2px;
+            transition: all 0.2s;
         }
 
         /* Sidebar */
         .sidebar {
             position: fixed;
             top: 0;
-            right: -300px;
-            width: 300px;
+            right: -320px;
+            width: 320px;
             height: 100vh;
-            background-color: var(--preto-fundo);
-            border-left: 1px solid var(--borda-elementos);
+            background: #0d0d0d;
+            backdrop-filter: blur(20px);
+            border-left: 1px solid var(--glass-border);
             z-index: 999;
-            padding-top: 80px;
-            transition: right 0.3s ease;
+            padding: 80px var(--space-lg) var(--space-lg);
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
         }
 
         .sidebar.active { 
@@ -115,15 +223,13 @@
 
         .sidebar-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
             z-index: 998;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
         }
 
         .sidebar-overlay.active {
@@ -134,82 +240,179 @@
         .menu-item {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: 1.2rem 2rem;
-            color: var(--texto-secundario);
+            gap: var(--space-md);
+            padding: var(--space-md);
+            margin-bottom: var(--space-sm);
+            color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
-            border-bottom: 1px solid var(--borda-elementos);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            border-radius: var(--radius-lg);
+            transition: all 0.2s;
+            position: relative;
         }
 
         .menu-item:hover {
-            background-color: var(--preto-card);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            transform: translateX(-4px);
+        }
+
+        .menu-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .menu-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke-width: 2;
+            transition: transform 0.2s;
+        }
+
+        .menu-item:hover .menu-icon svg {
+            transform: scale(1.1);
         }
 
         /* Main Content Responsivo */
         .main-content {
-            padding: 1rem;
-            max-width: 1200px;
-            margin: 90px auto 0 auto;
+            padding: calc(64px + var(--space-xl)) var(--space-lg) var(--space-xl);
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
         /* Grid de Estatísticas - Responsivo */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: var(--space-lg);
+            margin-bottom: var(--space-xl);
         }
 
         .stat-card {
-            background-color: var(--preto-card);
-            border: 1px solid var(--borda-elementos);
-            border-radius: 16px;
-            padding: 1.5rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-lg);
             text-align: center;
-            min-height: 120px;
+            min-height: 140px;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00ff7f, #00d4ff);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
         }
 
         .stat-icon { 
-            font-size: 1.8rem; 
-            opacity: 0.6; 
+            font-size: 2rem;
             margin-bottom: 0.5rem;
+            opacity: 0.8;
+            color: var(--primary-light);
+        }
+
+        .stat-icon svg {
+            width: 32px;
+            height: 32px;
+            stroke-width: 2;
+        }
+
+        /* Cores específicas para cada card */
+        .stat-card:nth-child(1) .stat-icon {
+            color: #00d4ff;
+        }
+
+        .stat-card:nth-child(2) .stat-icon {
+            color: #00ff7f;
+        }
+
+        .stat-card:nth-child(3) .stat-icon {
+            color: #00d4ff;
+        }
+
+        .stat-card:nth-child(4) .stat-icon {
+            color: #00ff7f;
         }
 
         .stat-value { 
-            font-size: 2rem; 
-            font-weight: 700; 
-            color: var(--cor-destaque); 
-            margin: 0.5rem 0; 
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--white);
+            line-height: 1;
+            margin: 0.5rem 0;
+            letter-spacing: -0.02em;
         }
 
         .stat-label { 
-            font-size: 0.8rem; 
-            color: var(--texto-secundario); 
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.6);
             text-transform: uppercase;
+            letter-spacing: 0.05em;
             line-height: 1.2;
         }
 
         /* Cards */
         .card {
-            background-color: var(--preto-card);
-            border: 1px solid var(--borda-elementos);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
         }
 
         .card h2 {
-            margin-bottom: 1rem;
-            font-size: 1.4rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .card h2 svg {
+            width: 24px;
+            height: 24px;
+            stroke-width: 2;
+            color: #00ff7f;
+            flex-shrink: 0;
         }
 
         /* Container do Gráfico Responsivo */
         .chart-container {
             position: relative;
-            height: 250px;
+            height: 320px;
             width: 100%;
         }
 
@@ -222,25 +425,33 @@
         .activity-item {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            border-radius: 12px;
-            margin-bottom: 0.5rem;
-            background-color: var(--preto-card);
-            border: 1px solid var(--borda-elementos);
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-md);
+            transition: all 0.2s;
+        }
+
+        .activity-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(4px);
         }
 
         .activity-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: var(--cor-destaque);
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #00ff7f, #00d4ff);
+            border-radius: var(--radius-lg);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--preto-fundo);
-            font-weight: 600;
+            color: #000;
+            font-weight: 700;
+            font-size: 1.125rem;
             flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0, 255, 127, 0.3);
         }
 
         .activity-info {
@@ -251,14 +462,57 @@
             display: inline-block;
             width: 24px;
             height: 24px;
-            border: 3px solid var(--borda-elementos);
+            border: 3px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
-            border-top-color: var(--cor-destaque);
-            animation: spin 1s linear infinite;
+            border-top-color: var(--primary);
+            animation: spin 0.8s linear infinite;
         }
 
         @keyframes spin { 
             to { transform: rotate(360deg); } 
+        }
+
+        .error-message {
+            color: #EF4444;
+            text-align: center;
+            padding: var(--space-md);
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: var(--radius-lg);
+            margin: var(--space-md) 0;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .success-message {
+            color: var(--accent);
+            text-align: center;
+            padding: var(--space-md);
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: var(--radius-lg);
+            margin: var(--space-md) 0;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .debug-info {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            margin: var(--space-md) 0;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
         }
 
         /* RESPONSIVIDADE */
@@ -266,12 +520,11 @@
         /* Tablets (768px e menos) */
         @media (max-width: 768px) {
             .header {
-                padding: 0.8rem 1rem;
+                padding: 0 var(--space-md);
             }
             
-            .logo {
-                font-size: 1.3rem;
-                gap: 8px;
+            .logo-text {
+                font-size: 1rem;
             }
             
             .header-logo {
@@ -279,22 +532,21 @@
             }
 
             .main-content {
-                padding: 0.8rem;
-                margin-top: 80px;
+                padding: calc(64px + var(--space-lg)) var(--space-md) var(--space-lg);
             }
 
             .dashboard-grid {
-                gap: 0.8rem;
-                margin-bottom: 1.5rem;
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--space-md);
             }
 
             .stat-card {
-                padding: 1.2rem;
-                min-height: 110px;
+                padding: var(--space-md);
+                min-height: 120px;
             }
 
             .stat-value {
-                font-size: 1.8rem;
+                font-size: 1.875rem;
             }
 
             .stat-icon {
@@ -302,55 +554,50 @@
             }
 
             .chart-container {
-                height: 220px;
+                height: 240px;
             }
 
             .card {
-                padding: 1.2rem;
-                margin-bottom: 1.2rem;
+                padding: var(--space-lg);
             }
         }
 
         /* Smartphones (480px e menos) */
         @media (max-width: 480px) {
             .header {
-                padding: 0.6rem 0.8rem;
+                padding: 0 var(--space-sm);
             }
             
-            .logo {
-                font-size: 1.1rem;
-                gap: 6px;
-            }
-            
-            .header-logo {
+            .logo-icon {
+                width: 32px;
                 height: 32px;
+                font-size: 1rem;
+            }
+            
+            .logo-text {
+                font-size: 0.9rem;
             }
 
             .hamburger {
-                width: 40px;
-                height: 40px;
+                width: 36px;
+                height: 36px;
             }
 
             .main-content {
-                padding: 0.6rem;
-                margin-top: 75px;
+                padding: calc(64px + var(--space-md)) var(--space-sm) var(--space-md);
             }
 
-            /* Grid 2x2 para mobile pequeno */
             .dashboard-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.6rem;
-                margin-bottom: 1.2rem;
+                gap: var(--space-sm);
             }
 
             .stat-card {
-                padding: 1rem;
+                padding: var(--space-sm);
                 min-height: 100px;
-                border-radius: 12px;
             }
 
             .stat-value {
-                font-size: 1.6rem;
+                font-size: 1.5rem;
             }
 
             .stat-icon {
@@ -359,7 +606,6 @@
 
             .stat-label {
                 font-size: 0.7rem;
-                line-height: 1.1;
             }
 
             .chart-container {
@@ -367,116 +613,43 @@
             }
 
             .card {
-                padding: 1rem;
-                margin-bottom: 1rem;
-                border-radius: 12px;
+                padding: var(--space-md);
+                border-radius: var(--radius-lg);
             }
 
             .card h2 {
-                font-size: 1.2rem;
-                margin-bottom: 0.8rem;
+                font-size: 1.1rem;
             }
 
             .activity-item {
-                padding: 0.8rem;
-                gap: 0.8rem;
+                padding: var(--space-sm);
+                gap: var(--space-sm);
             }
 
             .activity-avatar {
-                width: 45px;
-                height: 45px;
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
             }
 
             .sidebar {
                 width: 280px;
                 right: -280px;
             }
-
-            .menu-item {
-                padding: 1rem 1.5rem;
-            }
         }
 
-        /* Smartphones muito pequenos (360px e menos) */
-        @media (max-width: 360px) {
-            .main-content {
-                padding: 0.5rem;
-            }
-
-            .dashboard-grid {
-                gap: 0.5rem;
-            }
-
-            .stat-card {
-                padding: 0.8rem;
-                min-height: 90px;
-            }
-
-            .stat-value {
-                font-size: 1.4rem;
-            }
-
-            .stat-label {
-                font-size: 0.65rem;
-            }
-
-            .chart-container {
-                height: 180px;
-            }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
-        .error-message {
-            color: var(--cor-perigo);
-            text-align: center;
-            padding: 1rem;
-            background-color: rgba(255, 20, 147, 0.1);
-            border: 1px solid var(--cor-perigo);
-            border-radius: 8px;
-            margin: 1rem 0;
-        }
-
-        .success-message {
-            color: var(--cor-destaque);
-            text-align: center;
-            padding: 1rem;
-            background-color: rgba(0, 255, 127, 0.1);
-            border: 1px solid var(--cor-destaque);
-            border-radius: 8px;
-            margin: 1rem 0;
-        }
-
-        .debug-info {
-            background-color: var(--preto-card);
-            border: 1px solid var(--borda-elementos);
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 1rem 0;
-            font-size: 0.9rem;
-            color: var(--texto-secundario);
-        }
-        /* NOVO: Animações do fundo */
-        @keyframes float1 {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(100px, 100px); }
-        }
-        @keyframes float2 {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(-80px, -80px); }
-        }
-        body { overflow-x: hidden; }
     </style>
 </head>
 <body>
     <!-- Header -->
-    <!-- FUNDO ANIMADO -->
-    <div style="position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -1; background: linear-gradient(135deg, #0d0d0d 0%, #1a1a2e 100%);"></div>
-    <div style="position: fixed; width: 500px; height: 500px; background: radial-gradient(circle, rgba(0, 255, 127, 0.08) 0%, transparent 70%); border-radius: 50%; top: -250px; left: -250px; animation: float1 20s infinite ease-in-out; z-index: -1;"></div>
-    <div style="position: fixed; width: 400px; height: 400px; background: radial-gradient(circle, rgba(0, 212, 255, 0.08) 0%, transparent 70%); border-radius: 50%; bottom: -200px; right: -200px; animation: float2 15s infinite ease-in-out; z-index: -1;"></div>
-    
     <header class="header">
         <div class="header-content">
             <div class="logo">
-                <img src="fitcraft_personal_logo.png" alt="FitCraft Personal" class="header-logo" onerror="this.style.display='none'">
+                <img src="fitcraft_personal_logo.png" alt="FitCraft Personal" class="logo-image">
             </div>
             <div class="header-controls">
                 <button class="hamburger" id="hamburger">
@@ -491,19 +664,37 @@
     <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
         <a href="cadastrar_alunos.html" class="menu-item">
-            <span class="menu-icon">👥</span>
+            <span class="menu-icon">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M13 6C13 7.65685 11.6569 9 10 9C8.34315 9 7 7.65685 7 6C7 4.34315 8.34315 3 10 3C11.6569 3 13 4.34315 13 6Z" stroke="currentColor" stroke-width="2"/>
+                    <path d="M5 17C5 14.2386 7.23858 12 10 12C12.7614 12 15 14.2386 15 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </span>
             Clientes
         </a>
         <a href="criar_ficha.html" class="menu-item">
-            <span class="menu-icon">📋</span>
+            <span class="menu-icon">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 2H14C15.1046 2 16 2.89543 16 4V18L10 15L4 18V4C4 2.89543 4.89543 2 6 2Z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+            </span>
             Criar Ficha
         </a>
         <a href="https://fitcraft-gifs-html.vercel.app/" target="_blank" class="menu-item">
-            <span class="menu-icon">🎬</span>
+            <span class="menu-icon">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 4C3 2.89543 3.89543 2 5 2H15C16.1046 2 17 2.89543 17 4V16C17 17.1046 16.1046 18 15 18H5C3.89543 18 3 17.1046 3 16V4Z" stroke="currentColor" stroke-width="2"/>
+                    <path d="M7 7H13M7 11H13M7 15H10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </span>
             Biblioteca de GIFs
         </a>
-        <div class="menu-item" id="logoutBtn" style="cursor: pointer;">
-            <span class="menu-icon">🚪</span>
+        <div class="menu-item" id="logoutBtn" style="cursor: pointer; margin-top: auto;">
+            <span class="menu-icon">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M13 3H15C16.1046 3 17 3.89543 17 5V15C17 16.1046 16.1046 17 15 17H13M10 14L13 10M13 10L10 6M13 10H3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </span>
             Sair
         </div>
     </nav>
@@ -514,22 +705,38 @@
         <!-- Stats Grid -->
         <div class="dashboard-grid" id="statsGrid">
             <div class="stat-card">
-                <div class="stat-icon">👥</div>
+                <div class="stat-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17 20C17 18.3431 14.7614 17 12 17C9.23858 17 7 18.3431 7 20M21 17.0004C21 15.7702 19.7659 14.7129 18 14.25M3 17.0004C3 15.7702 4.2341 14.7129 6 14.25M18 10.2361C18.6137 9.68679 19 8.8885 19 8C19 6.34315 17.6569 5 16 5C15.2316 5 14.5308 5.28885 14 5.76389M6 10.2361C5.38625 9.68679 5 8.8885 5 8C5 6.34315 6.34315 5 8 5C8.76835 5 9.46924 5.28885 10 5.76389M12 14C10.3431 14 9 12.6569 9 11C9 9.34315 10.3431 8 12 8C13.6569 8 15 9.34315 15 11C15 12.6569 13.6569 14 12 14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
                 <div class="stat-value" id="totalClients">0</div>
                 <div class="stat-label">Total de Clientes</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">✅</div>
+                <div class="stat-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
                 <div class="stat-value" id="activeClients">0</div>
                 <div class="stat-label">Clientes Ativos</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">📋</div>
+                <div class="stat-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 12H15M9 16H15M17 21H7C5.89543 21 5 20.1046 5 19V5C5 3.89543 5.89543 3 7 3H12.5858C12.851 3 13.1054 3.10536 13.2929 3.29289L18.7071 8.70711C18.8946 8.89464 19 9.149 19 9.41421V19C19 20.1046 18.1046 21 17 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
                 <div class="stat-value" id="totalWorkouts">0</div>
                 <div class="stat-label">Fichas de Treino</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">📈</div>
+                <div class="stat-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M13 7H21M21 7V15M21 7L13 15L9 11L3 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
                 <div class="stat-value" id="monthlyGrowth">0</div>
                 <div class="stat-label">Crescimento Mensal</div>
             </div>
@@ -537,7 +744,12 @@
 
         <!-- Chart Card -->
         <div class="card">
-            <h2>Atividade dos Últimos 7 Dias</h2>
+            <h2>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 3V15M15 9V21M3 15L3 21M21 12V21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Atividade dos Últimos 7 Dias
+            </h2>
             <div class="chart-container">
                 <canvas id="activityChart"></canvas>
             </div>
@@ -545,9 +757,16 @@
 
         <!-- Recent Activities Card -->
         <div class="card">
-            <h2>Atividades Recentes</h2>
+            <h2>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 17H20L18.5951 15.5951C18.2141 15.2141 18 14.6973 18 14.1585V11C18 8.38757 16.3304 6.16509 14 5.34142V5C14 3.89543 13.1046 3 12 3C10.8954 3 10 3.89543 10 5V5.34142C7.66962 6.16509 6 8.38757 6 11V14.1585C6 14.6973 5.78595 15.2141 5.40493 15.5951L4 17H9M15 17V18C15 19.6569 13.6569 21 12 21C10.3431 21 9 19.6569 9 18V17M15 17H9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Atividades Recentes
+            </h2>
             <div id="recentActivities">
-                <div class="loading"></div>
+                <div style="display: flex; justify-content: center; padding: var(--space-xl);">
+                    <div class="loading"></div>
+                </div>
             </div>
         </div>
     </main>
@@ -683,7 +902,7 @@
                             backgroundColor: 'rgba(0, 255, 127, 0.6)',
                             borderColor: 'rgba(0, 255, 127, 1)',
                             borderWidth: 1,
-                            borderRadius: 5
+                            borderRadius: 8
                         }]
                     },
                     options: { 
@@ -692,16 +911,21 @@
                         scales: {
                             y: { 
                                 beginAtZero: true, 
-                                ticks: { color: '#808080', stepSize: 1 },
-                                grid: { color: '#2a2a2a' }
+                                ticks: { color: 'rgba(255, 255, 255, 0.7)', stepSize: 1 },
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' }
                             },
                             x: { 
-                                ticks: { color: '#808080' },
-                                grid: { color: '#2a2a2a' }
+                                ticks: { color: 'rgba(255, 255, 255, 0.7)' },
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' }
                             }
                         },
                         plugins: { 
-                            legend: { display: false } 
+                            legend: { 
+                                display: true,
+                                labels: {
+                                    color: 'rgba(255, 255, 255, 0.9)'
+                                }
+                            } 
                         }
                     }
                 });
@@ -718,7 +942,6 @@
             }
 
             try {
-                // Tenta fazer uma consulta simples para testar a conexão
                 const { data, error } = await _supabase
                     .from('clients')
                     .select('count', { count: 'exact', head: true });
@@ -726,7 +949,6 @@
                 if (error) {
                     debugLog('Erro ao testar conexão', error);
                     
-                    // Verifica se é erro de tabela não existente
                     if (error.message.includes('relation') && error.message.includes('does not exist')) {
                         debugLog('Tabela "clients" não existe. Criando estrutura sugerida...');
                         showMessage('⚠️ Tabela "clients" não encontrada no banco de dados. Verifique se as tabelas foram criadas corretamente.', 'error');
@@ -765,7 +987,7 @@
 
                 if (error) {
                     debugLog('Erro ao buscar total de clientes', error);
-                    return Math.floor(Math.random() * 25) + 5; // Fallback
+                    return Math.floor(Math.random() * 25) + 5;
                 }
 
                 debugLog(`Total de clientes encontrados: ${count}`);
@@ -773,7 +995,7 @@
                 
             } catch (err) {
                 debugLog('Erro ao buscar total de clientes', err);
-                return Math.floor(Math.random() * 25) + 5; // Fallback
+                return Math.floor(Math.random() * 25) + 5;
             }
         }
 
@@ -806,7 +1028,6 @@
 
                 debugLog('Buscando clientes recentes...');
 
-                // Primeira tentativa: buscar com todas as colunas necessárias
                 let { data, error } = await _supabase
                     .from('clients')
                     .select('id, nome, email, created_at')
@@ -816,7 +1037,6 @@
                 if (error) {
                     debugLog('Erro na primeira tentativa, testando colunas alternativas', error);
                     
-                    // Segunda tentativa: apenas id e nome
                     const { data: dataAlternativa, error: errorAlternativo } = await _supabase
                         .from('clients')
                         .select('id, nome, created_at')
@@ -843,7 +1063,6 @@
             } catch (err) {
                 debugLog('Erro ao buscar clientes recentes, usando dados simulados', err);
                 
-                // Dados simulados como fallback
                 return [
                     { 
                         id: 1, 
@@ -861,34 +1080,32 @@
 
         // Função para buscar clientes ativos (melhorada)
         async function buscarClientesAtivos() {
-    try {
-        if (!_supabase) {
-            console.log('[DEBUG] Usando dados simulados para clientes ativos');
-            return Math.floor(Math.random() * 20) + 5;
+            try {
+                if (!_supabase) {
+                    console.log('[DEBUG] Usando dados simulados para clientes ativos');
+                    return Math.floor(Math.random() * 20) + 5;
+                }
+
+                console.log('[DEBUG] Buscando clientes ativos (com credencial)...');
+                
+                const { count, error } = await _supabase
+                    .from('clients')
+                    .select('*', { count: 'exact', head: true })
+                    .not('credencial', 'is', null);
+
+                if (error) {
+                    console.error('[DEBUG] Erro ao buscar clientes ativos', error);
+                    return 0;
+                }
+
+                console.log(`[DEBUG] Clientes ativos encontrados: ${count}`);
+                return count || 0;
+                
+            } catch (err) {
+                console.error('[DEBUG] Erro catastrófico ao buscar clientes ativos', err);
+                return 0;
+            }
         }
-
-        console.log('[DEBUG] Buscando clientes ativos (com credencial)...');
-        
-        // A MÁGICA ACONTECE AQUI:
-        // Contamos apenas os clientes onde a coluna 'credencial' NÃO É nula.
-        const { count, error } = await _supabase
-            .from('clients')
-            .select('*', { count: 'exact', head: true })
-            .not('credencial', 'is', null); // Filtro para não nulos
-
-        if (error) {
-            console.error('[DEBUG] Erro ao buscar clientes ativos', error);
-            return 0; // Retorna 0 em caso de erro
-        }
-
-        console.log(`[DEBUG] Clientes ativos encontrados: ${count}`);
-        return count || 0;
-        
-    } catch (err) {
-        console.error('[DEBUG] Erro catastrófico ao buscar clientes ativos', err);
-        return 0;
-    }
-}
 
         // Função para buscar novos clientes do mês
         async function buscarNovosClientesNoMes() {
@@ -909,7 +1126,7 @@
 
                 if (error) {
                     debugLog('Erro ao buscar novos clientes no mês', error);
-                    return Math.floor(Math.random() * 8) + 1; // Fallback
+                    return Math.floor(Math.random() * 8) + 1;
                 }
 
                 debugLog(`Novos clientes no mês: ${count}`);
@@ -917,7 +1134,7 @@
                 
             } catch (err) {
                 debugLog('Erro ao buscar novos clientes no mês', err);
-                return Math.floor(Math.random() * 8) + 1; // Fallback
+                return Math.floor(Math.random() * 8) + 1;
             }
         }
 
@@ -931,7 +1148,6 @@
 
                 debugLog('Buscando total de fichas...');
                 
-                // Tentar várias possibilidades de nome de tabela
                 const tabelasPossiveis = ['workout_plans', 'fichas', 'treinos', 'workouts'];
                 
                 for (const tabela of tabelasPossiveis) {
@@ -954,7 +1170,7 @@
                 
             } catch (err) {
                 debugLog('Erro ao buscar total de fichas', err);
-                return Math.floor(Math.random() * 20) + 3; // Fallback
+                return Math.floor(Math.random() * 20) + 3;
             }
         }
 
@@ -967,7 +1183,6 @@
                     for (let i = 6; i >= 0; i--) {
                         const data = new Date();
                         data.setDate(data.getDate() - i);
-                        // Simulando alguns registros aleatórios
                         const quantidade = Math.floor(Math.random() * 5);
                         for (let j = 0; j < quantidade; j++) {
                             dados.push({ created_at: data.toISOString() });
@@ -998,7 +1213,6 @@
             } catch (err) {
                 debugLog('Erro ao buscar dados para gráfico, usando simulados', err);
                 
-                // Dados simulados como fallback
                 const dados = [];
                 for (let i = 6; i >= 0; i--) {
                     const data = new Date();
@@ -1018,7 +1232,6 @@
             
             const contagemPorDia = new Map();
 
-            // Inicializar os últimos 7 dias com 0
             for (let i = 6; i >= 0; i--) {
                 const d = new Date();
                 d.setDate(d.getDate() - i);
@@ -1026,7 +1239,6 @@
                 contagemPorDia.set(chave, 0);
             }
 
-            // Contar clientes por dia
             for (const cliente of clientes) {
                 const dataCliente = new Date(cliente.created_at);
                 const chave = `${String(dataCliente.getDate()).padStart(2, '0')}/${String(dataCliente.getMonth() + 1).padStart(2, '0')}`;
@@ -1055,13 +1267,12 @@
                 return;
             }
 
-            // Limpar conteúdo anterior
             container.innerHTML = '';
 
             if (!clientes || clientes.length === 0) {
                 debugLog('Nenhum cliente para renderizar');
                 container.innerHTML = `
-                    <div style="text-align: center; padding: 2rem; color: var(--texto-secundario);">
+                    <div style="text-align: center; padding: 2rem; color: rgba(255, 255, 255, 0.5);">
                         <div style="font-size: 3rem; opacity: 0.3; margin-bottom: 1rem;">📭</div>
                         <p>Nenhum cliente cadastrado recentemente.</p>
                         <p style="font-size: 0.9rem; margin-top: 0.5rem;">Os novos clientes aparecerão aqui.</p>
@@ -1076,7 +1287,6 @@
                 const data = new Date(cliente.created_at);
                 const agora = new Date();
                 
-                // Calcular tempo decorrido
                 const diffMs = agora - data;
                 const diffMinutos = Math.floor(diffMs / (1000 * 60));
                 const diffHoras = Math.floor(diffMs / (1000 * 60 * 60));
@@ -1093,7 +1303,6 @@
 
                 const dataFormatada = `${String(data.getDate()).padStart(2, '0')}/${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()}`;
 
-                // Gerar iniciais para o avatar
                 const nomeCompleto = cliente.nome || 'Cliente';
                 const iniciais = nomeCompleto.split(' ')
                     .map(word => word.charAt(0))
@@ -1105,39 +1314,26 @@
                 activityElement.className = 'activity-item';
                 activityElement.style.animation = `fadeIn 0.5s ease-in-out ${index * 0.1}s both`;
                 activityElement.innerHTML = `
-                    <div class="activity-avatar" style="background-color: ${getAvatarColor(cliente.id || index)}">${iniciais}</div>
+                    <div class="activity-avatar" style="background: linear-gradient(135deg, ${getAvatarColor(cliente.id || index)}, ${getAvatarColor((cliente.id || index) + 1)})">${iniciais}</div>
                     <div class="activity-info">
-                        <div><strong>Novo cliente cadastrado</strong></div>
-                        <div style="color: var(--cor-destaque); font-weight: 600; margin: 0.2rem 0;">${nomeCompleto}</div>
-                        <div style="color: var(--texto-secundario); font-size: 0.85rem;">
+                        <div style="font-weight: 600; color: var(--white);">Novo cliente cadastrado</div>
+                        <div style="color: var(--primary-light); font-weight: 600; margin: 0.2rem 0;">${nomeCompleto}</div>
+                        <div style="color: rgba(255, 255, 255, 0.5); font-size: 0.85rem;">
                             📅 ${dataFormatada} • ⏰ ${tempoDecorrido}
                         </div>
-                        ${cliente.email ? `<div style="color: var(--texto-secundario); font-size: 0.8rem; margin-top: 0.2rem;">📧 ${cliente.email}</div>` : ''}
+                        ${cliente.email ? `<div style="color: rgba(255, 255, 255, 0.5); font-size: 0.8rem; margin-top: 0.2rem;">📧 ${cliente.email}</div>` : ''}
                     </div>
                 `;
                 container.appendChild(activityElement);
             });
-
-            // Adicionar animação CSS se não existir
-            if (!document.getElementById('fadeInStyle')) {
-                const style = document.createElement('style');
-                style.id = 'fadeInStyle';
-                style.textContent = `
-                    @keyframes fadeIn {
-                        from { opacity: 0; transform: translateY(20px); }
-                        to { opacity: 1; transform: translateY(0); }
-                    }
-                `;
-                document.head.appendChild(style);
-            }
         }
 
         // Função para gerar cor do avatar baseada no ID
         function getAvatarColor(id) {
             const colors = [
-                '#00ff7f', '#00bfff', '#ff6347', '#ffc107', 
-                '#9c27b0', '#2196f3', '#4caf50', '#ff9800',
-                '#e91e63', '#00acc1', '#8bc34a', '#ff5722'
+                '#00ff7f', '#00d4ff', '#00e5ff', '#00cc66', 
+                '#00ffaa', '#00bfff', '#00ff99', '#00aaff',
+                '#00ff88', '#00ccff', '#00ffbb', '#0099ff'
             ];
             return colors[id % colors.length];
         }
@@ -1165,38 +1361,30 @@
             debugLog('=== FIM DA ATUALIZAÇÃO DO GRÁFICO ===');
         }
 
-        // SUBSTITUA SUA FUNÇÃO ANTIGA POR ESTA
-function atualizarRelogio() {
-    // 1. A linha de busca continua a mesma...
-    const cardFichas = document.querySelector('#totalWorkouts')?.closest('.stat-card');
+        // Função para atualizar relógio
+        function atualizarRelogio() {
+            const cardFichas = document.querySelector('#totalWorkouts')?.closest('.stat-card');
 
-    // 2. ...MAS AGORA TEMOS UMA VERIFICAÇÃO DE SEGURANÇA!
-    if (!cardFichas) {
-        // Se o card não for encontrado, a função para silenciosamente aqui.
-        // Isso impede o erro 'TypeError' e permite que o resto do JS (como o logout) funcione.
-        return; 
-    }
+            if (!cardFichas) {
+                return; 
+            }
 
-    // 3. O resto do código só é executado SE `cardFichas` for encontrado.
-    const agora = new Date();
-    const dia = String(agora.getDate()).padStart(2, '0');
-    const mes = String(agora.getMonth() + 1).padStart(2, '0');
-    const ano = agora.getFullYear();
-    const hora = String(agora.getHours()).padStart(2, '0');
-    const minuto = String(agora.getMinutes()).padStart(2, '0');
+            const agora = new Date();
+            const dia = String(agora.getDate()).padStart(2, '0');
+            const mes = String(agora.getMonth() + 1).padStart(2, '0');
+            const ano = agora.getFullYear();
+            const hora = String(agora.getHours()).padStart(2, '0');
+            const minuto = String(agora.getMinutes()).padStart(2, '0');
 
-    cardFichas.innerHTML = `
-        <div class="stat-icon" style="font-size: 1.5rem;">📅</div>
-        <div class="stat-value" style="font-size: 1.7rem; color: var(--texto-principal);">${dia}/${mes}/${ano}</div>
-        <div class="stat-label" style="font-size: 1.5rem; color: var(--texto-secundario); margin-top: 5px;">${hora}:${minuto}</div>
-    `;
-}
+            cardFichas.innerHTML = `
+                <div class="stat-icon" style="font-size: 1.8rem;">📅</div>
+                <div class="stat-value" style="font-size: 1.7rem; color: var(--white);">${dia}/${mes}/${ano}</div>
+                <div class="stat-label" style="font-size: 1.3rem; color: rgba(255, 255, 255, 0.6); margin-top: 5px; text-transform: none;">${hora}:${minuto}</div>
+            `;
+        }
 
-// 1. Chama a função imediatamente para que o relógio apareça na hora.
-atualizarRelogio();
-
-// 2. Configura um intervalo para atualizar o relógio a cada segundo.
-setInterval(atualizarRelogio, 1000);
+        atualizarRelogio();
+        setInterval(atualizarRelogio, 1000);
 
         // Função para atualizar atividades recentes
         async function atualizarAtividadesRecentes() {
@@ -1232,7 +1420,6 @@ setInterval(atualizarRelogio, 1000);
                 monthlyGrowth: document.getElementById('monthlyGrowth')
             };
 
-            // Exibir loading
             for (const key in elements) {
                 if (elements[key]) {
                     elements[key].innerHTML = '<div class="loading" style="width: 20px; height: 20px;"></div>';
@@ -1240,7 +1427,6 @@ setInterval(atualizarRelogio, 1000);
             }
 
             try {
-                // Buscar dados em paralelo
                 const [
                     totalClientes,
                     totalFichas,
@@ -1253,7 +1439,6 @@ setInterval(atualizarRelogio, 1000);
                     buscarNovosClientesNoMes()
                 ]);
 
-                // Atualizar display com animação
                 if (elements.totalClients) {
                     animateNumber(elements.totalClients, totalClientes);
                 }
@@ -1289,7 +1474,7 @@ setInterval(atualizarRelogio, 1000);
 
         // Função para animar números
         function animateNumber(element, targetNumber, prefix = '') {
-            const duration = 1000; // 1 segundo
+            const duration = 1000;
             const start = performance.now();
             const startNumber = 0;
 
@@ -1297,7 +1482,6 @@ setInterval(atualizarRelogio, 1000);
                 const elapsed = currentTime - start;
                 const progress = Math.min(elapsed / duration, 1);
                 
-                // Easing function (ease out)
                 const easeOut = 1 - Math.pow(1 - progress, 3);
                 const currentNumber = Math.floor(startNumber + (targetNumber - startNumber) * easeOut);
                 
@@ -1316,14 +1500,11 @@ setInterval(atualizarRelogio, 1000);
             debugLog('=== INICIANDO DASHBOARD ===');
             
             try {
-                // Mostrar mensagem de carregamento
                 showMessage('🔄 Carregando dashboard...', 'info');
                 
-                // Inicializar Supabase
                 const supabaseIniciado = initSupabase();
                 
                 if (supabaseIniciado) {
-                    // Testar conexão
                     const conexaoOK = await testarConexaoSupabase();
                     if (conexaoOK) {
                         showMessage('✅ Conectado ao banco de dados!', 'success');
@@ -1334,13 +1515,11 @@ setInterval(atualizarRelogio, 1000);
                     showMessage('⚠️ Supabase não configurado. Usando dados simulados para demonstração.', 'error');
                 }
                 
-                // Inicializar componentes
                 new MenuManager();
                 meuDashboard = new Dashboard();
 
                 debugLog('Componentes inicializados');
 
-                // Executar todas as atualizações em paralelo
                 await Promise.all([
                     popularCardsDeEstatisticas(),
                     atualizarGraficoDeAtividade(),
@@ -1349,30 +1528,24 @@ setInterval(atualizarRelogio, 1000);
 
                 debugLog('Dashboard carregado completamente!');
 
-                // Configurar logout
-                 const logoutButton = document.getElementById('logoutBtn');
+                const logoutButton = document.getElementById('logoutBtn');
                 if (logoutButton) {
                     logoutButton.addEventListener('click', async () => {
                         if (confirm('Tem certeza que deseja sair?')) {
                             debugLog('Iniciando processo de logout...');
                             
-                            // Verifica se o Supabase está inicializado
                             if (_supabase) {
-                                // Chama a função de signOut do Supabase
                                 const { error } = await _supabase.auth.signOut();
 
                                 if (error) {
-                                    // Se der erro, avisa o usuário mas tenta redirecionar mesmo assim
                                     debugLog('Erro ao fazer logout no Supabase:', error);
                                     showMessage('Erro ao encerrar a sessão. Tente novamente.', 'error');
                                 } else {
-                                    // Se o logout for bem-sucedido, limpa o console e redireciona
                                     debugLog('Logout realizado com sucesso. Redirecionando...');
-                                    console.clear(); // Limpa o console para a próxima sessão de login
-                                    window.location.href = 'index.html'; // Redireciona para a página de login
+                                    console.clear();
+                                    window.location.href = 'index.html';
                                 }
                             } else {
-                                // Fallback caso o Supabase não esteja disponível
                                 debugLog('Supabase não inicializado. Redirecionando diretamente.');
                                 window.location.href = 'index.html';
                             }
@@ -1380,7 +1553,6 @@ setInterval(atualizarRelogio, 1000);
                     });
                 }
 
-                // Remover mensagem de carregamento
                 setTimeout(() => {
                     const messages = document.querySelectorAll('.success-message, .error-message');
                     messages.forEach(msg => {
@@ -1400,7 +1572,6 @@ setInterval(atualizarRelogio, 1000);
 
         // Função para atualizar dados periodicamente
         function iniciarAtualizacaoAutomatica() {
-            // Atualizar a cada 30 segundos
             setInterval(async () => {
                 debugLog('Executando atualização automática...');
                 try {
@@ -1420,7 +1591,7 @@ setInterval(atualizarRelogio, 1000);
             iniciarAtualizacaoAutomatica();
         });
 
-        // Função para recarregar dados manualmente (pode ser chamada do console)
+        // Função para recarregar dados manualmente
         window.recarregarDashboard = async function() {
             debugLog('Recarregando dashboard manualmente...');
             await Promise.all([
@@ -1431,7 +1602,7 @@ setInterval(atualizarRelogio, 1000);
             showMessage('✅ Dashboard recarregado!', 'success');
         };
 
-        // Debug: Função para mostrar estrutura da tabela (pode ser chamada do console)
+        // Debug: Função para mostrar estrutura da tabela
         window.debugTabela = async function() {
             if (!_supabase) {
                 console.log('Supabase não inicializado');
