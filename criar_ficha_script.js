@@ -7,6 +7,10 @@ let currentWorkoutPlanId = null;
 let currentAlunoId = null;
 let fichaSelecionada = null;
 
+// ===== VARIÁVEIS DE AGRUPAMENTO =====
+let exercicioPendente = null;
+const TECNICAS_AGRUPAMENTO = ["Bi-set", "Tri-set", "Giant set", "Super-set"];
+
 // ===== CARREGAR EXERCÍCIOS COM GIFS =====
 async function carregarExerciciosComGifs() {
     try {
@@ -89,6 +93,18 @@ function mostrarPreviewGif(nomeExercicio) {
     }
 }
 
+// ===== LIMPAR CAMPOS DO FORMULÁRIO DE EXERCÍCIO =====
+function limparCamposExercicio() {
+    document.getElementById("grupo-muscular").value = "";
+    document.getElementById("exercicio").value = "";
+    document.getElementById("exercicio").disabled = true;
+    document.getElementById("series").value = "3";
+    document.getElementById("repeticoes").value = "12";
+    document.getElementById("tecnica").value = "";
+    document.getElementById("observacao-exercicio").value = "";
+    document.getElementById('exercise-preview').classList.remove('active');
+}
+
 // ===== ADICIONAR EXERCÍCIO =====
 function adicionarExercicio() {
     const nomeFicha = document.getElementById("nome-ficha").value.trim();
@@ -109,33 +125,89 @@ function adicionarExercicio() {
         return;
     }
 
-    const novoExercicio = {
-        id: Date.now(),
-        grupoMuscular: grupoSel.options[grupoSel.selectedIndex]?.text || "",
-        exercicio: exercicioNome,
-        series: parseInt(series),
-        repeticoes: repeticoes,
-        tecnica: tecnica || null,
-        observacao: observacao || null,
-        gifUrl: exerciciosGifMap[exercicioNome]?.path || null,
-        grupoTecnicaId: null
-    };
+    const ehTecnicaAgrupamento = TECNICAS_AGRUPAMENTO.includes(tecnica);
 
-    exerciciosAdicionados.push(novoExercicio);
+    if (ehTecnicaAgrupamento) {
+        if (!exercicioPendente) {
+            // Primeiro exercício do grupo: guarda como pendente e aguarda o próximo
+            exercicioPendente = {
+                id: Date.now(),
+                grupoMuscular: grupoSel.options[grupoSel.selectedIndex]?.text || "",
+                exercicio: exercicioNome,
+                series: parseInt(series),
+                repeticoes: repeticoes,
+                tecnica: tecnica,
+                observacao: observacao || null,
+                gifUrl: exerciciosGifMap[exercicioNome]?.path || null,
+                grupoTecnicaId: null
+            };
+            limparCamposExercicio();
+            alert(`✅ 1º exercício do ${tecnica} registrado!\n\nAgora adicione o próximo exercício do grupo com a mesma técnica.`);
+            return;
+        } else {
+            // Exercício seguinte do grupo
+            let grupoTecnicaId;
+
+            if (!exercicioPendente.grupoTecnicaId) {
+                // Segunda entrada: cria o ID do grupo e empurra o primeiro exercício
+                grupoTecnicaId = `grupo_${Date.now()}`;
+                exercicioPendente.grupoTecnicaId = grupoTecnicaId;
+                exerciciosAdicionados.push(exercicioPendente);
+            } else {
+                // Terceira entrada em diante (Tri-set / Giant set)
+                grupoTecnicaId = exercicioPendente.grupoTecnicaId;
+            }
+
+            const novoExercicio = {
+                id: Date.now() + Math.random(),
+                grupoMuscular: grupoSel.options[grupoSel.selectedIndex]?.text || "",
+                exercicio: exercicioNome,
+                series: parseInt(series),
+                repeticoes: repeticoes,
+                tecnica: tecnica,
+                observacao: observacao || null,
+                gifUrl: exerciciosGifMap[exercicioNome]?.path || null,
+                grupoTecnicaId: grupoTecnicaId
+            };
+            exerciciosAdicionados.push(novoExercicio);
+
+            // Bi-set e Super-set ficam completos com 2 exercícios — zera pendente
+            if (tecnica === "Bi-set" || tecnica === "Super-set") {
+                exercicioPendente = null;
+            } else {
+                // Tri-set / Giant set: mantém referência ao grupo para continuar agrupando
+                exercicioPendente = { grupoTecnicaId: grupoTecnicaId, tecnica: tecnica };
+                alert(`✅ Exercício adicionado ao ${tecnica}!\n\nAdicione mais um exercício ao grupo ou troque a técnica para encerrar o grupo.`);
+            }
+        }
+    } else {
+        // Técnica normal ou sem técnica
+        // Se havia um exercício pendente de agrupamento abandonado, adiciona-o sem grupo
+        if (exercicioPendente && exercicioPendente.id) {
+            exercicioPendente.grupoTecnicaId = null;
+            exerciciosAdicionados.push(exercicioPendente);
+        }
+        exercicioPendente = null;
+
+        const novoExercicio = {
+            id: Date.now(),
+            grupoMuscular: grupoSel.options[grupoSel.selectedIndex]?.text || "",
+            exercicio: exercicioNome,
+            series: parseInt(series),
+            repeticoes: repeticoes,
+            tecnica: tecnica || null,
+            observacao: observacao || null,
+            gifUrl: exerciciosGifMap[exercicioNome]?.path || null,
+            grupoTecnicaId: null
+        };
+        exerciciosAdicionados.push(novoExercicio);
+    }
+
     contadorExercicios = exerciciosAdicionados.length;
-    
     atualizarListaExercicios();
     atualizarContadorExercicios();
     document.getElementById("pdf-section").style.display = "block";
-
-    document.getElementById("grupo-muscular").value = "";
-    document.getElementById("exercicio").value = "";
-    document.getElementById("exercicio").disabled = true;
-    document.getElementById("series").value = "3";
-    document.getElementById("repeticoes").value = "12";
-    document.getElementById("tecnica").value = "";
-    document.getElementById("observacao-exercicio").value = "";
-    document.getElementById('exercise-preview').classList.remove('active');
+    limparCamposExercicio();
 }
 
 // ===== ATUALIZAR LISTA =====
@@ -152,29 +224,68 @@ function atualizarListaExercicios() {
         return;
     }
 
-    exerciciosAdicionados.forEach((ex) => {
-        const item = document.createElement("div");
-        item.className = "exercise-item";
+    const processados = new Set();
 
-        const gifUrl = ex.gifUrl ? `https://gifs.fitcraft.com.br${ex.gifUrl}` : '';
-        
-        item.innerHTML = `
-            ${gifUrl ? `<div class="exercise-item-gif"><img src="${gifUrl}" alt="${ex.exercicio}"></div>` : ''}
-            <div class="exercise-item-content">
-                <h3>${ex.exercicio} <span style="color: var(--text-dim); font-size: 0.9rem;">(${ex.grupoMuscular})</span></h3>
-                <p class="details">Séries: ${ex.series} | Repetições: ${ex.repeticoes}${ex.tecnica ? ` | Técnica: ${ex.tecnica}` : ''}</p>
-                ${ex.observacao ? `<div class="observacao"><strong>Obs:</strong> ${ex.observacao}</div>` : ''}
-            </div>
-            <button class="remove-btn" onclick="removerExercicio(${ex.id})">×</button>
-        `;
-        
-        lista.appendChild(item);
+    exerciciosAdicionados.forEach((ex) => {
+        if (processados.has(ex.id)) return;
+
+        if (ex.grupoTecnicaId) {
+            // Renderiza todos os exercícios do grupo juntos
+            const grupo = exerciciosAdicionados.filter(e => e.grupoTecnicaId === ex.grupoTecnicaId);
+            const groupDiv = document.createElement("div");
+            groupDiv.style.cssText = "border: 2px solid #3498db; border-radius: 10px; margin-bottom: 12px; overflow: hidden;";
+            groupDiv.innerHTML = `<div style="background:#3498db; color:white; padding:8px 14px; font-weight:700; font-size:0.95rem; letter-spacing:0.5px;">${ex.tecnica.toUpperCase()}</div>`;
+
+            grupo.forEach(exGrupo => {
+                const gifUrl = exGrupo.gifUrl ? `https://gifs.fitcraft.com.br${exGrupo.gifUrl}` : '';
+                const item = document.createElement("div");
+                item.className = "exercise-item";
+                item.style.borderRadius = "0";
+                item.style.marginBottom = "0";
+                item.style.borderBottom = "1px solid #e0e0e0";
+                item.innerHTML = `
+                    ${gifUrl ? `<div class="exercise-item-gif"><img src="${gifUrl}" alt="${exGrupo.exercicio}"></div>` : ''}
+                    <div class="exercise-item-content">
+                        <h3>${exGrupo.exercicio} <span style="color: var(--text-dim); font-size: 0.9rem;">(${exGrupo.grupoMuscular})</span></h3>
+                        <p class="details">Séries: ${exGrupo.series} | Repetições: ${exGrupo.repeticoes}</p>
+                        ${exGrupo.observacao ? `<div class="observacao"><strong>Obs:</strong> ${exGrupo.observacao}</div>` : ''}
+                    </div>
+                    <button class="remove-btn" onclick="removerExercicio(${exGrupo.id})">×</button>
+                `;
+                groupDiv.appendChild(item);
+                processados.add(exGrupo.id);
+            });
+
+            lista.appendChild(groupDiv);
+        } else {
+            // Exercício normal
+            const item = document.createElement("div");
+            item.className = "exercise-item";
+            const gifUrl = ex.gifUrl ? `https://gifs.fitcraft.com.br${ex.gifUrl}` : '';
+            item.innerHTML = `
+                ${gifUrl ? `<div class="exercise-item-gif"><img src="${gifUrl}" alt="${ex.exercicio}"></div>` : ''}
+                <div class="exercise-item-content">
+                    <h3>${ex.exercicio} <span style="color: var(--text-dim); font-size: 0.9rem;">(${ex.grupoMuscular})</span></h3>
+                    <p class="details">Séries: ${ex.series} | Repetições: ${ex.repeticoes}${ex.tecnica ? ` | Técnica: ${ex.tecnica}` : ''}</p>
+                    ${ex.observacao ? `<div class="observacao"><strong>Obs:</strong> ${ex.observacao}</div>` : ''}
+                </div>
+                <button class="remove-btn" onclick="removerExercicio(${ex.id})">×</button>
+            `;
+            lista.appendChild(item);
+            processados.add(ex.id);
+        }
     });
 }
 
 // ===== REMOVER EXERCÍCIO =====
 function removerExercicio(id) {
-    exerciciosAdicionados = exerciciosAdicionados.filter(ex => ex.id !== id);
+    const ex = exerciciosAdicionados.find(e => e.id === id);
+    if (ex && ex.grupoTecnicaId) {
+        // Remove todos os exercícios do grupo junto
+        exerciciosAdicionados = exerciciosAdicionados.filter(e => e.grupoTecnicaId !== ex.grupoTecnicaId);
+    } else {
+        exerciciosAdicionados = exerciciosAdicionados.filter(e => e.id !== id);
+    }
     atualizarListaExercicios();
     atualizarContadorExercicios();
     if (exerciciosAdicionados.length === 0) {
@@ -192,6 +303,7 @@ function limparDadosFicha() {
     currentWorkoutPlanId = null;
     fichaSelecionada = null;
     exerciciosAdicionados = [];
+    exercicioPendente = null;
     contadorExercicios = 0;
     document.getElementById('nome-ficha').value = '';
     document.getElementById('data-troca').value = new Date().toISOString().split('T')[0];
@@ -247,6 +359,7 @@ async function iniciarEdicaoFicha(fichaId) {
     document.getElementById('data-troca').value = workoutPlan.data_troca;
     document.getElementById('observacoes-aluno').value = workoutPlan.observacoes || '';
     exerciciosAdicionados = workoutPlan.exercicios || [];
+    exercicioPendente = null;
     contadorExercicios = exerciciosAdicionados.length;
     
     document.getElementById('dados-ficha-section').style.display = 'block';
@@ -512,7 +625,6 @@ async function gerarTreinoComIA(promptDoPersonal) {
     if (loadingDiv) loadingDiv.style.display = 'block';
 
     try {
-        // CHAMA SEU BACKEND VERCEL (igual ao antigo)
         const response = await fetch('/api/gerar-treino', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -522,7 +634,6 @@ async function gerarTreinoComIA(promptDoPersonal) {
         });
 
         if (!response.ok) {
-            // Lógica de erro do arquivo antigo
             let errorMessage = 'Erro desconhecido na API';
             try {
                 const errorData = await response.json();
@@ -627,14 +738,12 @@ async function preencherFichaComDadosDaIA(plano) {
 document.addEventListener('DOMContentLoaded', async () => {
     await popularAlunosSelect();
     
-    // Carregar exercícios
     exerciciosPorGrupo = await carregarExerciciosComGifs();
     if (!exerciciosPorGrupo) {
         exerciciosPorGrupo = {};
         alert('Erro ao carregar exercícios. Verifique sua conexão.');
     }
 
-    // ===== BOTÃO DE GERAR COM IA =====
     const btnGerarIA = document.getElementById('btn-gerar-com-ia');
     if (btnGerarIA) {
         btnGerarIA.addEventListener('click', async () => {
@@ -655,13 +764,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // ===== BOTÃO ADICIONAR EXERCÍCIO =====
     const btnAdicionarExercicio = document.getElementById('btn-adicionar-exercicio');
     if (btnAdicionarExercicio) {
         btnAdicionarExercicio.addEventListener('click', adicionarExercicio);
     }
 
-    // ===== SELECT DE ALUNO =====
     document.getElementById('select-aluno').addEventListener('change', async (event) => {
         currentAlunoId = event.target.value;
         limparDadosFicha();
@@ -677,7 +784,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // ===== SELECT DE GRUPO MUSCULAR =====
     document.getElementById('grupo-muscular').addEventListener('change', (event) => {
         const grupoSelecionado = event.target.value;
         const exercicioSelect = document.getElementById('exercicio');
@@ -696,7 +802,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // ===== SELECT DE EXERCÍCIO - MOSTRAR GIF =====
     document.getElementById('exercicio').addEventListener('change', (event) => {
         const exercicio = event.target.value;
         if (exercicio) {
@@ -706,9 +811,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // ===== DELEGAÇÃO DE EVENTOS PARA BOTÕES E FICHAS =====
     document.addEventListener('click', (event) => {
-        // Botão de deletar ficha
         const deleteBtnClicado = event.target.closest('.delete-ficha-btn');
         if (deleteBtnClicado) {
             event.stopPropagation();
@@ -718,7 +821,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Clique em item da ficha (selecionar)
         const fichaItemClicado = event.target.closest('.ficha-item');
         if (fichaItemClicado) {
             document.querySelectorAll('.ficha-item').forEach(item => item.classList.remove('selected'));
@@ -728,25 +830,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Botão Editar Ficha
         if (event.target.closest('#btn-editar-ficha')) {
             if (!event.target.closest('#btn-editar-ficha').disabled && fichaSelecionada) {
                 iniciarEdicaoFicha(fichaSelecionada.id);
             }
         } 
-        // Botão Nova Ficha
         else if (event.target.closest('#btn-nova-ficha')) {
             iniciarNovaFicha();
         } 
-        // Botão Salvar Ficha
         else if (event.target.closest('#btn-salvar-ficha')) {
             salvarFichaOnline();
         } 
-        // Botão Gerar PDF
         else if (event.target.closest('#btn-gerar-pdf')) {
             gerarPDF();
         } 
-        // Botão Cancelar Edição
         else if (event.target.closest('#btn-cancelar-edicao')) {
             document.getElementById('dados-ficha-section').style.display = 'none';
             document.getElementById('adicionar-exercicio-section').style.display = 'none';
