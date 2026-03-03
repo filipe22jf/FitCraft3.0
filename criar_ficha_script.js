@@ -127,81 +127,83 @@ function adicionarExercicio() {
 
     const ehTecnicaAgrupamento = TECNICAS_AGRUPAMENTO.includes(tecnica);
 
-    if (ehTecnicaAgrupamento) {
-        if (!exercicioPendente) {
-            // Primeiro exercício do grupo: guarda como pendente e aguarda o próximo
-            exercicioPendente = {
-                id: Date.now(),
-                grupoMuscular: grupoSel.options[grupoSel.selectedIndex]?.text || "",
-                exercicio: exercicioNome,
-                series: parseInt(series),
-                repeticoes: repeticoes,
-                tecnica: tecnica,
-                observacao: observacao || null,
-                gifUrl: exerciciosGifMap[exercicioNome]?.path || null,
-                grupoTecnicaId: null
-            };
-            limparCamposExercicio();
-            alert(`✅ 1º exercício do ${tecnica} registrado!\n\nAgora adicione o próximo exercício do grupo com a mesma técnica.`);
-            return;
-        } else {
-            // Exercício seguinte do grupo
-            let grupoTecnicaId;
+    // ── Se já existe um grupo aguardando o próximo exercício ──
+    if (exercicioPendente) {
+        let grupoTecnicaId;
 
-            if (!exercicioPendente.grupoTecnicaId) {
-                // Segunda entrada: cria o ID do grupo e empurra o primeiro exercício
-                grupoTecnicaId = `grupo_${Date.now()}`;
-                exercicioPendente.grupoTecnicaId = grupoTecnicaId;
-                exerciciosAdicionados.push(exercicioPendente);
-            } else {
-                // Terceira entrada em diante (Tri-set / Giant set)
-                grupoTecnicaId = exercicioPendente.grupoTecnicaId;
-            }
-
-            const novoExercicio = {
-                id: Date.now() + Math.random(),
-                grupoMuscular: grupoSel.options[grupoSel.selectedIndex]?.text || "",
-                exercicio: exercicioNome,
-                series: parseInt(series),
-                repeticoes: repeticoes,
-                tecnica: tecnica,
-                observacao: observacao || null,
-                gifUrl: exerciciosGifMap[exercicioNome]?.path || null,
-                grupoTecnicaId: grupoTecnicaId
-            };
-            exerciciosAdicionados.push(novoExercicio);
-
-            // Bi-set e Super-set ficam completos com 2 exercícios — zera pendente
-            if (tecnica === "Bi-set" || tecnica === "Super-set") {
-                exercicioPendente = null;
-            } else {
-                // Tri-set / Giant set: mantém referência ao grupo para continuar agrupando
-                exercicioPendente = { grupoTecnicaId: grupoTecnicaId, tecnica: tecnica };
-                alert(`✅ Exercício adicionado ao ${tecnica}!\n\nAdicione mais um exercício ao grupo ou troque a técnica para encerrar o grupo.`);
-            }
-        }
-    } else {
-        // Técnica normal ou sem técnica
-        // Se havia um exercício pendente de agrupamento abandonado, adiciona-o sem grupo
-        if (exercicioPendente && exercicioPendente.id) {
-            exercicioPendente.grupoTecnicaId = null;
+        if (!exercicioPendente.grupoTecnicaId) {
+            // Segunda entrada: cria o ID do grupo e empurra o primeiro exercício
+            grupoTecnicaId = `grupo_${Date.now()}`;
+            exercicioPendente.grupoTecnicaId = grupoTecnicaId;
             exerciciosAdicionados.push(exercicioPendente);
+        } else {
+            // Terceira entrada em diante (Tri-set / Giant set)
+            grupoTecnicaId = exercicioPendente.grupoTecnicaId;
         }
-        exercicioPendente = null;
 
         const novoExercicio = {
+            id: Date.now() + Math.random(),
+            grupoMuscular: grupoSel.options[grupoSel.selectedIndex]?.text || "",
+            exercicio: exercicioNome,
+            series: parseInt(series),
+            repeticoes: repeticoes,
+            tecnica: tecnica || null,        // ← técnica própria, pode ser diferente ou vazia
+            observacao: observacao || null,
+            gifUrl: exerciciosGifMap[exercicioNome]?.path || null,
+            grupoTecnicaId: grupoTecnicaId
+        };
+        exerciciosAdicionados.push(novoExercicio);
+
+        // Bi-set e Super-set ficam completos com 2 exercícios — zera pendente
+        const tecnicaDoGrupo = exercicioPendente.tecnica;
+        if (tecnicaDoGrupo === "Bi-set" || tecnicaDoGrupo === "Super-set") {
+            exercicioPendente = null;
+        } else {
+            // Tri-set / Giant set: mantém referência ao grupo para continuar agrupando
+            exercicioPendente = { grupoTecnicaId: grupoTecnicaId, tecnica: tecnicaDoGrupo };
+            alert(`✅ Exercício adicionado ao ${tecnicaDoGrupo}!\n\nAdicione mais um exercício ao grupo ou adicione um exercício sem técnica de grupo para encerrar.`);
+        }
+
+        contadorExercicios = exerciciosAdicionados.length;
+        atualizarListaExercicios();
+        atualizarContadorExercicios();
+        document.getElementById("pdf-section").style.display = "block";
+        limparCamposExercicio();
+        return;
+    }
+
+    // ── Nenhum grupo pendente ──
+    if (ehTecnicaAgrupamento) {
+        // Primeiro exercício do grupo: guarda como pendente e aguarda o próximo
+        exercicioPendente = {
             id: Date.now(),
             grupoMuscular: grupoSel.options[grupoSel.selectedIndex]?.text || "",
             exercicio: exercicioNome,
             series: parseInt(series),
             repeticoes: repeticoes,
-            tecnica: tecnica || null,
+            tecnica: tecnica,
             observacao: observacao || null,
             gifUrl: exerciciosGifMap[exercicioNome]?.path || null,
             grupoTecnicaId: null
         };
-        exerciciosAdicionados.push(novoExercicio);
+        limparCamposExercicio();
+        alert(`✅ 1º exercício do ${tecnica} registrado!\n\nAgora adicione o próximo exercício do grupo. A técnica do 2º exercício pode ser diferente ou deixada em branco.`);
+        return;
     }
+
+    // ── Exercício totalmente normal ──
+    const novoExercicio = {
+        id: Date.now(),
+        grupoMuscular: grupoSel.options[grupoSel.selectedIndex]?.text || "",
+        exercicio: exercicioNome,
+        series: parseInt(series),
+        repeticoes: repeticoes,
+        tecnica: tecnica || null,
+        observacao: observacao || null,
+        gifUrl: exerciciosGifMap[exercicioNome]?.path || null,
+        grupoTecnicaId: null
+    };
+    exerciciosAdicionados.push(novoExercicio);
 
     contadorExercicios = exerciciosAdicionados.length;
     atualizarListaExercicios();
@@ -247,7 +249,7 @@ function atualizarListaExercicios() {
                     ${gifUrl ? `<div class="exercise-item-gif"><img src="${gifUrl}" alt="${exGrupo.exercicio}"></div>` : ''}
                     <div class="exercise-item-content">
                         <h3>${exGrupo.exercicio} <span style="color: var(--text-dim); font-size: 0.9rem;">(${exGrupo.grupoMuscular})</span></h3>
-                        <p class="details">Séries: ${exGrupo.series} | Repetições: ${exGrupo.repeticoes}</p>
+                        <p class="details">Séries: ${exGrupo.series} | Repetições: ${exGrupo.repeticoes}${exGrupo.tecnica ? ` | Técnica: ${exGrupo.tecnica}` : ''}</p>
                         ${exGrupo.observacao ? `<div class="observacao"><strong>Obs:</strong> ${exGrupo.observacao}</div>` : ''}
                     </div>
                     <button class="remove-btn" onclick="removerExercicio(${exGrupo.id})">×</button>
